@@ -1,2 +1,25 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PetRadar.API/PetRadar.API.csproj" />
+    <Project Path="src/PetRadar.SharedKernel/PetRadar.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Animals/">
+    <Project Path="src/Modules/Animals/Animals.Application/Animals.Application.csproj" />
+    <Project Path="src/Modules/Animals/Animals.Domain/Animals.Domain.csproj" />
+    <Project Path="src/Modules/Animals/Animals.Infrastructure/Animals.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Identity.Application/Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Domain/Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Media/">
+    <Project Path="src/Modules/Media/Media.Application/Media.Application.csproj" />
+    <Project Path="src/Modules/Media/Media.Infrastructure/Media.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Notifications.Application/Notifications.Application.csproj" />
+    <Project Path="src/Modules/Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj" />
+  </Folder>
 </Solution>
