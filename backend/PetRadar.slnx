@@ -22,4 +22,7 @@
     <Project Path="src/Modules/Notifications/Notifications.Application/Notifications.Application.csproj" />
     <Project Path="src/Modules/Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Identity.Domain.Tests/Identity.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
