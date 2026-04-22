@@ -18,5 +18,7 @@ public sealed record AnimalStatus
 
     public static AnimalStatus Found() => new("Found");
 
+    public static AnimalStatus From(string value) => new(value);
+
     public override string ToString() => Value;
 }

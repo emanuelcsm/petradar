@@ -72,6 +72,41 @@ public sealed class AnimalPost : AggregateRoot
         return animalPost;
     }
 
+    public static AnimalPost Rehydrate(
+        string id,
+        string userId,
+        string description,
+        string status,
+        GeoLocation location,
+        IReadOnlyList<string>? mediaIds,
+        DateTime createdAt)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            throw new InvalidAnimalPostIdException();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new InvalidAnimalUserIdException();
+
+        if (string.IsNullOrWhiteSpace(description))
+            throw new InvalidAnimalDescriptionException("Animal description cannot be null or empty.");
+
+        var normalizedDescription = description.Trim();
+
+        if (normalizedDescription.Length < 10)
+            throw new InvalidAnimalDescriptionException("Animal description must have at least 10 characters.");
+
+        IReadOnlyList<string> normalizedMediaIds = mediaIds?.ToList().AsReadOnly() ?? [];
+
+        return new AnimalPost(
+            id,
+            userId.Trim(),
+            normalizedDescription,
+            AnimalStatus.From(status),
+            location,
+            normalizedMediaIds,
+            createdAt);
+    }
+
     public void MarkAsFound()
     {
         if (Status == AnimalStatus.Found())
