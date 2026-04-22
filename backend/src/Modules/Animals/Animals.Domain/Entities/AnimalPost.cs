@@ -78,5 +78,7 @@ public sealed class AnimalPost : AggregateRoot
             throw new AnimalAlreadyFoundException(Id);
 
         Status = AnimalStatus.Found();
+
+        AddDomainEvent(new AnimalFoundEvent(Id, UserId, DateTime.UtcNow));
     }
 }
