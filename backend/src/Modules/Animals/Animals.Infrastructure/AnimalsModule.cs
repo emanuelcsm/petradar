@@ -29,8 +29,15 @@ public static class AnimalsModule
                     .Descending(x => x.CreatedAt),
                 new CreateIndexOptions { Name = "ix_animals_posts_status_createdAt" });
 
+            var createdAtIdIndex = new CreateIndexModel<AnimalPostDocument>(
+                Builders<AnimalPostDocument>.IndexKeys
+                    .Descending(x => x.CreatedAt)
+                    .Descending(x => x.Id),
+                new CreateIndexOptions { Name = "ix_animals_posts_createdAt_id" });
+
             collection.Indexes.CreateOne(geoIndex);
             collection.Indexes.CreateOne(statusCreatedAtIndex);
+            collection.Indexes.CreateOne(createdAtIdIndex);
 
             return collection;
         });
