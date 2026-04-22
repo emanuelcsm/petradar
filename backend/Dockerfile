@@ -5,6 +5,7 @@ WORKDIR /build
 COPY global.json ./
 COPY PetRadar.slnx ./
 COPY src/ ./src/
+COPY tests/ ./tests/
 
 RUN dotnet restore PetRadar.slnx
 
