@@ -1,6 +1,9 @@
 using Identity.Application.Interfaces;
+using Identity.Application.Interfaces.Security;
+using Identity.Application.Commands.RegisterUser;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Documents;
+using Identity.Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -10,6 +13,9 @@ public static class IdentityModule
 {
     public static IServiceCollection AddIdentityModule(this IServiceCollection services)
     {
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<RegisterUserCommandHandler>());
+
         services.AddSingleton(sp =>
         {
             var collection = sp.GetRequiredService<IMongoDatabase>()
@@ -28,6 +34,7 @@ public static class IdentityModule
         });
 
         services.AddScoped<IUserRepository, MongoUserRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
         return services;
     }
 }
