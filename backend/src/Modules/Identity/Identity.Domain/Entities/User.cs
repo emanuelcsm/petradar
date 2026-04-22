@@ -30,13 +30,14 @@ public sealed class User : AggregateRoot
         Email email,
         string name,
         string passwordHash,
-        GeoLocation? alertLocation) : base(id)
+        GeoLocation? alertLocation,
+        DateTime createdAt) : base(id)
     {
         Email = email;
         Name = name;
         PasswordHash = passwordHash;
         AlertLocation = alertLocation;
-        CreatedAt = DateTime.UtcNow;
+        CreatedAt = createdAt;
     }
 
     /// <summary>
@@ -59,10 +60,31 @@ public sealed class User : AggregateRoot
         var emailVo = new Email(email);
         var id = Guid.NewGuid().ToString();
 
-        var user = new User(id, emailVo, name.Trim(), passwordHash, alertLocation);
+        var user = new User(id, emailVo, name.Trim(), passwordHash, alertLocation, DateTime.UtcNow);
 
         user.AddDomainEvent(new UserRegisteredEvent(id, emailVo.Value, name.Trim()));
 
         return user;
+    }
+
+    /// <summary>
+    /// Rehydrates an existing user from persistence without emitting new domain events.
+    /// </summary>
+    public static User Rehydrate(
+        string id,
+        string email,
+        string name,
+        string passwordHash,
+        GeoLocation? alertLocation,
+        DateTime createdAt)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new InvalidUserNameException("Name cannot be null or empty.");
+
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new InvalidPasswordHashException("Password hash cannot be null or empty.");
+
+        var emailVo = new Email(email);
+        return new User(id, emailVo, name.Trim(), passwordHash, alertLocation, createdAt);
     }
 }

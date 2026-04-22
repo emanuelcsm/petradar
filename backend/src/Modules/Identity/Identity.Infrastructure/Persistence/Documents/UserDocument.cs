@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Identity.Domain.Entities;
 using PetRadar.SharedKernel.ValueObjects;
 
 namespace Identity.Infrastructure.Persistence.Documents;
@@ -29,4 +30,29 @@ internal sealed class UserDocument
     [BsonElement("createdAt")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     public DateTime CreatedAt { get; set; }
+
+    public static UserDocument FromDomain(User user)
+    {
+        return new UserDocument
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            EmailNormalized = user.Email.Value,
+            Name = user.Name,
+            PasswordHash = user.PasswordHash,
+            AlertLocation = user.AlertLocation,
+            CreatedAt = user.CreatedAt
+        };
+    }
+
+    public User ToDomain()
+    {
+        return User.Rehydrate(
+            id: Id,
+            email: Email,
+            name: Name,
+            passwordHash: PasswordHash,
+            alertLocation: AlertLocation,
+            createdAt: CreatedAt);
+    }
 }
