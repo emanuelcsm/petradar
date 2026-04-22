@@ -2,7 +2,7 @@ using PetRadar.SharedKernel.Exceptions;
 
 namespace Identity.Domain.Exceptions.Authentication;
 
-public sealed class InvalidCredentialsException : DomainException
+public sealed class InvalidCredentialsException : UnauthorizedException
 {
     public const string Code = "INVALID_CREDENTIALS";
 

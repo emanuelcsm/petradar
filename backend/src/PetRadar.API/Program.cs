@@ -1,5 +1,6 @@
 using Identity.Infrastructure;
 using PetRadar.API.Infrastructure;
+using PetRadar.API.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseGlobalExceptionMiddleware();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
