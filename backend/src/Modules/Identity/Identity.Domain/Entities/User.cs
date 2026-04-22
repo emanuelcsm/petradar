@@ -1,3 +1,5 @@
+using Identity.Domain.Events;
+using Identity.Domain.Exceptions;
 using Identity.Domain.ValueObjects;
 using PetRadar.SharedKernel.Entities;
 using PetRadar.SharedKernel.ValueObjects;
@@ -35,5 +37,32 @@ public sealed class User : AggregateRoot
         PasswordHash = passwordHash;
         AlertLocation = alertLocation;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// The only way to create a new <see cref="User"/>.
+    /// Validates inputs, builds the Email value object, assigns an ID, and
+    /// accumulates a <see cref="UserRegisteredEvent"/> to be dispatched after persistence.
+    /// </summary>
+    public static User Create(
+        string email,
+        string name,
+        string passwordHash,
+        GeoLocation? alertLocation = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new InvalidUserNameException("Name cannot be null or empty.");
+
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new InvalidPasswordHashException("Password hash cannot be null or empty.");
+
+        var emailVo = new Email(email);
+        var id = Guid.NewGuid().ToString();
+
+        var user = new User(id, emailVo, name.Trim(), passwordHash, alertLocation);
+
+        user.AddDomainEvent(new UserRegisteredEvent(id, emailVo.Value, name.Trim()));
+
+        return user;
     }
 }
