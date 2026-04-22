@@ -1,4 +1,5 @@
 using Animals.Application.Commands.CreateAnimalPost;
+using Animals.Application.Commands.MarkAsFound;
 using Animals.Application.Queries.GetAnimalsByLocation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -84,5 +85,22 @@ public sealed class AnimalsController : ControllerBase
         return Ok(response.ToPagedResponse(
             nextPageToken: result.NextPageToken,
             hasNextPage: result.HasNextPage));
+    }
+
+    [HttpPatch("{id}/found")]
+    [Authorize]
+    public async Task<IActionResult> MarkAsFound(
+        [FromRoute] string id,
+        CancellationToken cancellationToken)
+    {
+        var requesterUserId = User.GetRequiredUserId();
+
+        var command = new MarkAsFoundCommand(
+            AnimalPostId: id,
+            RequesterUserId: requesterUserId);
+
+        await _sender.Send(command, cancellationToken);
+
+        return NoContent();
     }
 }
