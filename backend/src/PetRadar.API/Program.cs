@@ -1,6 +1,15 @@
+using PetRadar.API.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Infrastructure — shared
+builder.Services.AddMongoDb(builder.Configuration);
+
+// Modules
+// builder.Services.AddAnimalsModule();
+// builder.Services.AddIdentityModule();
+// builder.Services.AddNotificationsModule();
+// builder.Services.AddMediaModule();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
