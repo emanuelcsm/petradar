@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Infrastructure — shared
 builder.Services.AddMongoDb(builder.Configuration);
+builder.Services.AddRedis(builder.Configuration);
 
 // Modules
 // builder.Services.AddAnimalsModule();
