@@ -1,3 +1,4 @@
+using Animals.Application.Commands.CreateAnimalPost;
 using Animals.Application.Interfaces;
 using Animals.Infrastructure.Persistence;
 using Animals.Infrastructure.Persistence.Documents;
@@ -10,6 +11,9 @@ public static class AnimalsModule
 {
     public static IServiceCollection AddAnimalsModule(this IServiceCollection services)
     {
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<CreateAnimalPostCommandHandler>());
+
         services.AddSingleton(sp =>
         {
             var collection = sp.GetRequiredService<IMongoDatabase>()
