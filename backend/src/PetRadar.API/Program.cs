@@ -1,3 +1,4 @@
+using Identity.Infrastructure;
 using PetRadar.API.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,7 @@ builder.Services.AddDomainEvents();
 
 // Modules
 // builder.Services.AddAnimalsModule();
-// builder.Services.AddIdentityModule();
+builder.Services.AddIdentityModule();
 // builder.Services.AddNotificationsModule();
 // builder.Services.AddMediaModule();
 

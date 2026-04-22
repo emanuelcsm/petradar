@@ -19,7 +19,7 @@ internal sealed class MongoUserRepository : IUserRepository
         var normalizedEmail = email.Trim().ToLowerInvariant();
 
         var document = await _collection
-            .Find(x => x.EmailNormalized == normalizedEmail)
+            .Find(x => x.Email == normalizedEmail)
             .FirstOrDefaultAsync(cancellationToken);
 
         return document?.ToDomain();
