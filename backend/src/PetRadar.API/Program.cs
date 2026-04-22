@@ -7,10 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMongoDb(builder.Configuration);
 builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddDomainEvents();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Modules
 // builder.Services.AddAnimalsModule();
-builder.Services.AddIdentityModule();
+builder.Services.AddIdentityModule(builder.Configuration);
 // builder.Services.AddNotificationsModule();
 // builder.Services.AddMediaModule();
 
@@ -28,6 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

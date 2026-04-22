@@ -1,9 +1,12 @@
-using Identity.Application.Interfaces;
-using Identity.Application.Interfaces.Security;
 using Identity.Application.Commands.RegisterUser;
+using Identity.Application.Interfaces;
+using Identity.Application.Interfaces.Auth;
+using Identity.Application.Interfaces.Security;
+using Identity.Infrastructure.Auth;
 using Identity.Infrastructure.Persistence;
 using Identity.Infrastructure.Persistence.Documents;
 using Identity.Infrastructure.Security;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -11,7 +14,9 @@ namespace Identity.Infrastructure;
 
 public static class IdentityModule
 {
-    public static IServiceCollection AddIdentityModule(this IServiceCollection services)
+    public static IServiceCollection AddIdentityModule(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssemblyContaining<RegisterUserCommandHandler>());
@@ -35,6 +40,10 @@ public static class IdentityModule
 
         services.AddScoped<IUserRepository, MongoUserRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+
         return services;
     }
 }
