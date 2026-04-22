@@ -93,21 +93,64 @@ O `docker-compose.yml` na raiz do repositório já inclui o serviço `mongo`:
 services:
   mongo:
     image: mongo:8
-    ports:
-      - "27017:27017"        # expõe localmente para debug com Compass
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongo_data:/data/db  # persiste os dados entre reinicializações
+    # Sem 'ports:' — acessível apenas dentro da rede Docker
 
 volumes:
   mongo_data:
 ```
+
+### Credenciais de autenticação
+
+O MongoDB **não tem usuário ou senha por padrão**. Ao usar a imagem Docker oficial,
+as variáveis `MONGO_INITDB_ROOT_USERNAME` e `MONGO_INITDB_ROOT_PASSWORD` instruem
+o container a **criar um usuário root** com os valores que você definir, na primeira
+vez que o container sobe. Sem essas variáveis, o banco subiria sem autenticação.
+
+O backend usa esses mesmos valores para se conectar — é por isso que eles precisam
+coincidir entre o serviço `mongo` e o serviço `backend` no `docker-compose.yml`.
+
+**Exemplo do fluxo:**
+```
+.env  →  MONGO_INITDB_ROOT_USERNAME=petradar_root
+         MONGO_INITDB_ROOT_PASSWORD=MinhaS3nh4
+
+docker-compose sobe o mongo  →  cria o usuário "petradar_root" com a senha "MinhaS3nh4"
+docker-compose sobe o backend  →  conecta com mongodb://petradar_root:MinhaS3nh4@mongo:27017/...
+```
+
+**Como configurar:**
+
+1. Copie o `.env.example` para `.env` (se ainda não fez):
+   ```bash
+   # Linux / macOS
+   cp .env.example .env
+
+   # Windows (PowerShell)
+   Copy-Item .env.example .env
+   ```
+2. Abra o `.env` e defina o nome de usuário e senha que desejar:
+   ```
+   MONGO_INITDB_ROOT_USERNAME=petradar_root
+   MONGO_INITDB_ROOT_PASSWORD=SuaSenhaForteAqui
+   ```
+3. Consulte `backend/docs/setup-env.md` para instruções de geração de senhas seguras.
+
+> **Importante:** essas variáveis só têm efeito na **primeira** inicialização do
+> container (quando o volume `mongo_data` ainda não existe). Se o volume já foi
+> criado com outras credenciais, remova-o antes de alterar os valores:
+> `docker-compose down -v` (apaga todos os dados).
 
 ### Variáveis de ambiente do backend no compose
 
 ```yaml
 backend:
   environment:
-    - MongoDB__ConnectionString=mongodb://mongo:27017
+    - MongoDB__ConnectionString=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/petradar?authSource=admin
     - MongoDB__DatabaseName=petradar
 ```
 
@@ -115,8 +158,19 @@ backend:
 
 ### Inspecionar dados dentro do container
 
+Execute a partir da raiz do repositório (onde está o `docker-compose.yml`).
+Substitua os valores pelo que você definiu no seu `.env`:
+
 ```bash
-docker exec -it <nome_do_container_mongo> mongosh
+docker-compose exec mongo mongosh \
+  -u SEU_MONGO_INITDB_ROOT_USERNAME \
+  -p SEU_MONGO_INITDB_ROOT_PASSWORD \
+  --authenticationDatabase admin
+```
+
+Dentro do shell:
+
+```js
 use petradar
 show collections
 ```

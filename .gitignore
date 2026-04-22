@@ -1,0 +1,9 @@
+# Environment variables — never commit this file
+.env
+
+# Frontend dependencies
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
