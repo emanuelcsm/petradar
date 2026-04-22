@@ -1,4 +1,3 @@
-using Identity.Infrastructure;
 using PetRadar.API.Infrastructure;
 using PetRadar.API.Infrastructure.Middleware;
 
@@ -12,10 +11,7 @@ builder.Services.AddDomainEvents();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Modules
-// builder.Services.AddAnimalsModule();
-builder.Services.AddIdentityModule(builder.Configuration);
-// builder.Services.AddNotificationsModule();
-// builder.Services.AddMediaModule();
+builder.Services.AddApplicationModules(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
