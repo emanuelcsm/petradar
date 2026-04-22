@@ -1,4 +1,5 @@
 using Animals.Domain.Exceptions;
+using Animals.Domain.Events;
 using Animals.Domain.ValueObjects;
 using PetRadar.SharedKernel.Entities;
 using PetRadar.SharedKernel.ValueObjects;
@@ -52,7 +53,7 @@ public sealed class AnimalPost : AggregateRoot
 
         IReadOnlyList<string> normalizedMediaIds = mediaIds?.ToList().AsReadOnly() ?? [];
 
-        return new AnimalPost(
+        var animalPost = new AnimalPost(
             Guid.NewGuid().ToString(),
             userId.Trim(),
             normalizedDescription,
@@ -60,6 +61,15 @@ public sealed class AnimalPost : AggregateRoot
             location,
             normalizedMediaIds,
             DateTime.UtcNow);
+
+        animalPost.AddDomainEvent(new AnimalPostedEvent(
+            animalPost.Id,
+            animalPost.UserId,
+            animalPost.Location.Latitude,
+            animalPost.Location.Longitude,
+            animalPost.CreatedAt));
+
+        return animalPost;
     }
 
     public void MarkAsFound()
