@@ -15,12 +15,14 @@ internal sealed class MongoKnownMediaRepository : IKnownMediaRepository
 
     public async Task SaveAsync(
         string mediaId,
-        string storagePath,
+        string publicUrl,
+        string? storagePath = null,
         CancellationToken cancellationToken = default)
     {
         var document = new KnownMediaDocument
         {
             Id = mediaId,
+            PublicUrl = publicUrl,
             StoragePath = storagePath
         };
 
@@ -29,6 +31,26 @@ internal sealed class MongoKnownMediaRepository : IKnownMediaRepository
             document,
             new ReplaceOptions { IsUpsert = true },
             cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<KnownMediaReadModel>> GetByIdsAsync(
+        IReadOnlyCollection<string> mediaIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (mediaIds.Count == 0)
+        {
+            return [];
+        }
+
+        var documents = await _collection
+            .Find(x => mediaIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        return documents
+            .Select(document => new KnownMediaReadModel(
+                MediaId: document.Id,
+                PublicUrl: document.PublicUrl))
+            .ToList();
     }
 
     public async Task<bool> ExistsByIdAsync(

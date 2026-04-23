@@ -4,7 +4,12 @@ public interface IKnownMediaRepository
 {
     Task SaveAsync(
         string mediaId,
-        string storagePath,
+        string publicUrl,
+        string? storagePath = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<KnownMediaReadModel>> GetByIdsAsync(
+        IReadOnlyCollection<string> mediaIds,
         CancellationToken cancellationToken = default);
 
     Task<bool> ExistsByIdAsync(

@@ -17,6 +17,7 @@ public sealed class MediaUploadedIntegrationEventHandler : INotificationHandler<
     {
         return _knownMediaRepository.SaveAsync(
             notification.MediaId,
+            notification.PublicUrl,
             notification.StoragePath,
             cancellationToken);
     }

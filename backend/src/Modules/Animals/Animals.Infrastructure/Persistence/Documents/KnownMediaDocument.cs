@@ -11,5 +11,8 @@ internal sealed class KnownMediaDocument
     public string Id { get; set; } = default!;
 
     [BsonElement("storagePath")]
-    public string StoragePath { get; set; } = default!;
+    public string? StoragePath { get; set; }
+
+    [BsonElement("publicUrl")]
+    public string PublicUrl { get; set; } = default!;
 }
