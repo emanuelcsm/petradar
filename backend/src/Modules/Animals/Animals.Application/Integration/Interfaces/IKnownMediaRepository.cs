@@ -1,6 +1,6 @@
 namespace Animals.Application.Integration.Interfaces;
 
-public interface IAnimalPostMediaRepository
+public interface IKnownMediaRepository
 {
     Task SaveAsync(
         string mediaId,

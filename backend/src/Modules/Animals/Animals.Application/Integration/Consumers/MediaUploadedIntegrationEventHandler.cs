@@ -6,16 +6,16 @@ namespace Animals.Application.Integration.Consumers;
 
 public sealed class MediaUploadedIntegrationEventHandler : INotificationHandler<MediaUploadedIntegrationEvent>
 {
-    private readonly IAnimalPostMediaRepository _animalPostMediaRepository;
+    private readonly IKnownMediaRepository _knownMediaRepository;
 
-    public MediaUploadedIntegrationEventHandler(IAnimalPostMediaRepository animalPostMediaRepository)
+    public MediaUploadedIntegrationEventHandler(IKnownMediaRepository knownMediaRepository)
     {
-        _animalPostMediaRepository = animalPostMediaRepository;
+        _knownMediaRepository = knownMediaRepository;
     }
 
     public Task Handle(MediaUploadedIntegrationEvent notification, CancellationToken cancellationToken)
     {
-        return _animalPostMediaRepository.SaveAsync(
+        return _knownMediaRepository.SaveAsync(
             notification.MediaId,
             notification.StoragePath,
             cancellationToken);

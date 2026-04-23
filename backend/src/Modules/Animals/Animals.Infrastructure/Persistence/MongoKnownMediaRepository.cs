@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace Animals.Infrastructure.Persistence;
 
-internal sealed class MongoKnownMediaRepository : IAnimalPostMediaRepository
+internal sealed class MongoKnownMediaRepository : IKnownMediaRepository
 {
     private readonly IMongoCollection<KnownMediaDocument> _collection;
 
