@@ -8,5 +8,7 @@ public interface IMediaStorage
         string contentType,
         CancellationToken cancellationToken = default);
 
+    Task DeleteAsync(string storagePath, CancellationToken cancellationToken = default);
+
     string GetUrl(string storagePath);
 }
