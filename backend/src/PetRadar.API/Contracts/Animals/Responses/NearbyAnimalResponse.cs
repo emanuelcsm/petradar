@@ -7,5 +7,5 @@ public sealed record NearbyAnimalResponse(
     string Status,
     double Latitude,
     double Longitude,
-    IReadOnlyList<string> MediaIds,
+    IReadOnlyList<AnimalMediaResponse> Media,
     DateTime CreatedAt);

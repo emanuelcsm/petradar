@@ -78,7 +78,11 @@ public sealed class AnimalsController : ControllerBase
                 Status: item.Status,
                 Latitude: item.Latitude,
                 Longitude: item.Longitude,
-                MediaIds: item.MediaIds,
+                Media: item.Media
+                    .Select(media => new AnimalMediaResponse(
+                        MediaId: media.MediaId,
+                        Url: media.Url))
+                    .ToList(),
                 CreatedAt: item.CreatedAt))
             .ToList();
 
