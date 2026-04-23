@@ -2,6 +2,7 @@ using Media.Application.Interfaces.Persistence;
 using Media.Application.Interfaces.Storage;
 using Media.Domain.Entities;
 using MediatR;
+using PetRadar.SharedKernel.Events;
 
 namespace Media.Application.Commands.UploadMedia;
 
@@ -9,13 +10,16 @@ public sealed class UploadMediaCommandHandler : IRequestHandler<UploadMediaComma
 {
     private readonly IMediaStorage _mediaStorage;
     private readonly IMediaRepository _mediaRepository;
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
     public UploadMediaCommandHandler(
         IMediaStorage mediaStorage,
-        IMediaRepository mediaRepository)
+        IMediaRepository mediaRepository,
+        IDomainEventDispatcher domainEventDispatcher)
     {
         _mediaStorage = mediaStorage;
         _mediaRepository = mediaRepository;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public async Task<UploadMediaResult> Handle(
@@ -37,6 +41,9 @@ public sealed class UploadMediaCommandHandler : IRequestHandler<UploadMediaComma
         try
         {
             await _mediaRepository.SaveAsync(mediaFile, cancellationToken);
+
+            var domainEvents = mediaFile.CollectDomainEvents();
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
         }
         catch
         {

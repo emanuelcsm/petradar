@@ -1,4 +1,5 @@
 using Media.Domain.Exceptions;
+using Media.Domain.Events;
 using PetRadar.SharedKernel.Entities;
 
 namespace Media.Domain.Entities;
@@ -46,13 +47,20 @@ public sealed class MediaFile : AggregateRoot
         if (string.IsNullOrWhiteSpace(uploadedBy))
             throw new InvalidMediaUploadedByException();
 
-        return new MediaFile(
+        var mediaFile = new MediaFile(
             id: Guid.NewGuid().ToString(),
             fileName: fileName.Trim(),
             mimeType: mimeType.Trim(),
             storagePath: storagePath.Trim(),
             uploadedBy: uploadedBy.Trim(),
             createdAt: DateTime.UtcNow);
+
+        mediaFile.AddDomainEvent(new MediaUploadedDomainEvent(
+            mediaFile.Id,
+            mediaFile.StoragePath,
+            mediaFile.UploadedBy));
+
+        return mediaFile;
     }
 
     public static MediaFile Rehydrate(
