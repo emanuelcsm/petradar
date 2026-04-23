@@ -16,6 +16,7 @@
   </Folder>
   <Folder Name="/src/Modules/Media/">
     <Project Path="src/Modules/Media/Media.Application/Media.Application.csproj" />
+    <Project Path="src/Modules/Media/Media.Domain/Media.Domain.csproj" />
     <Project Path="src/Modules/Media/Media.Infrastructure/Media.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Notifications/">
