@@ -29,6 +29,17 @@ internal static class ApiOptionsServiceExtensions
                 "MediaUpload:AllowedMimeTypes cannot contain empty values.")
             .ValidateOnStart();
 
+        services
+            .AddOptions<FrontendCorsOptions>()
+            .Bind(configuration.GetSection(FrontendCorsOptions.SectionName))
+            .Validate(options => options.AllowedOrigins.Count > 0,
+                "Cors:Frontend:AllowedOrigins must contain at least one origin.")
+            .Validate(options => options.AllowedOrigins.All(origin =>
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)),
+                "Cors:Frontend:AllowedOrigins must contain only valid absolute HTTP/HTTPS origins.")
+            .ValidateOnStart();
+
         services.AddScoped<IMediaUploadRequestValidator, MediaUploadRequestValidator>();
 
         return services;

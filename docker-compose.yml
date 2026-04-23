@@ -27,6 +27,7 @@ services:
       - Jwt__Audience=PetRadar
       - Jwt__ExpiresInMinutes=60
       - LocalStorage__BasePath=${MEDIA_BASE_PATH}
+      - Cors__Frontend__AllowedOrigins__0=${FRONTEND_ORIGIN}
     volumes:
       - media_data:${MEDIA_BASE_PATH}
     depends_on:

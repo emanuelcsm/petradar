@@ -48,7 +48,7 @@ Tudo roda dentro dos containers.
    ```
 
 3. Edite o `.env` e preencha os valores reais.
-   Consulte [`backend/docs/setup-env.md`](backend/docs/setup-env.md) para instruções
+   Consulte [`docs/setup-env.md`](docs/setup-env.md) para instruções
    detalhadas sobre como gerar o `JWT_SECRET` e as credenciais do MongoDB.
 
 ---
@@ -96,6 +96,8 @@ O arquivo `.env` nunca é commitado — use `.env.example` como referência.
 | `JWT_SECRET`                  | Segredo de assinatura dos tokens JWT (≥32 chars) |
 | `MONGO_INITDB_ROOT_USERNAME`  | Usuário root do MongoDB                      |
 | `MONGO_INITDB_ROOT_PASSWORD`  | Senha do usuário root do MongoDB             |
+| `MEDIA_BASE_PATH`             | Caminho de armazenamento de mídia no container |
+| `FRONTEND_ORIGIN`             | Origem HTTP/HTTPS do frontend permitida no CORS |
 
 ---
 

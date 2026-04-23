@@ -72,6 +72,8 @@ O arquivo `.env` deve ter este formato (com valores reais):
 JWT_SECRET=<string aleatória ≥32 chars>
 MONGO_INITDB_ROOT_USERNAME=petradar_root
 MONGO_INITDB_ROOT_PASSWORD=<senha forte>
+MEDIA_BASE_PATH=/app/media
+FRONTEND_ORIGIN=http://localhost:5173
 ```
 
 ---
@@ -93,3 +95,5 @@ Não é necessário passar `--env-file` nem exportar as variáveis no shell.
 | `JWT_SECRET`                  | backend           | Segredo de assinatura dos tokens JWT          |
 | `MONGO_INITDB_ROOT_USERNAME`  | mongo, backend    | Usuário root do MongoDB                       |
 | `MONGO_INITDB_ROOT_PASSWORD`  | mongo, backend    | Senha do usuário root do MongoDB              |
+| `MEDIA_BASE_PATH`             | backend           | Caminho de persistência de uploads no container |
+| `FRONTEND_ORIGIN`             | backend           | Origem permitida no CORS (ex.: `http://localhost:5173`) |

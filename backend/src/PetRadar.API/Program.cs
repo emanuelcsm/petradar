@@ -9,6 +9,8 @@ builder.Services.AddMongoDb(builder.Configuration);
 builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddDomainEvents();
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddRealtime();
+builder.Services.AddFrontendCors(builder.Configuration);
 
 // Modules
 builder.Services.AddApplicationModules(builder.Configuration);
@@ -28,10 +30,12 @@ if (app.Environment.IsDevelopment())
 app.UseGlobalExceptionMiddleware();
 app.UseHttpsRedirection();
 app.UseLocalMediaStaticFiles();
+app.UseFrontendCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRealtimeEndpoints();
 
 app.Run();
