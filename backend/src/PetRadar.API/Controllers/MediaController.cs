@@ -6,6 +6,7 @@ using PetRadar.API.Contracts.Media.Requests;
 using PetRadar.API.Contracts.Media.Responses;
 using PetRadar.API.Infrastructure.Auth;
 using PetRadar.API.Infrastructure.Responses;
+using PetRadar.API.Infrastructure.Validation.Media;
 
 namespace PetRadar.API.Controllers;
 
@@ -15,10 +16,14 @@ namespace PetRadar.API.Controllers;
 public sealed class MediaController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly IMediaUploadRequestValidator _mediaUploadRequestValidator;
 
-    public MediaController(ISender sender)
+    public MediaController(
+        ISender sender,
+        IMediaUploadRequestValidator mediaUploadRequestValidator)
     {
         _sender = sender;
+        _mediaUploadRequestValidator = mediaUploadRequestValidator;
     }
 
     [HttpPost]
@@ -27,9 +32,11 @@ public sealed class MediaController : ControllerBase
         [FromForm] UploadMediaRequest request,
         CancellationToken cancellationToken)
     {
+        _mediaUploadRequestValidator.Validate(request.File);
+
         var userId = User.GetRequiredUserId();
 
-        var command = new UploadMediaCommand(
+        var command = new UploadMediaCommand( 
             UploadedBy: userId,
             File: new UploadMediaFileDto(
                 Content: request.File.OpenReadStream(),

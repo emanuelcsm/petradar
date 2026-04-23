@@ -37,6 +37,7 @@ internal sealed class GlobalExceptionMiddleware
             ForbiddenException ex    => (HttpStatusCode.Forbidden,             ex.ErrorCode, ex.Message),
             NotFoundException ex     => (HttpStatusCode.NotFound,              ex.ErrorCode, ex.Message),
             ConflictException ex     => (HttpStatusCode.Conflict,              ex.ErrorCode, ex.Message),
+            ValidationException ex   => (HttpStatusCode.BadRequest,            ex.ErrorCode, ex.Message),
             DomainException ex       => (HttpStatusCode.UnprocessableEntity,   ex.ErrorCode, ex.Message),
             _                        => (HttpStatusCode.InternalServerError, "INTERNAL_ERROR", "An unexpected error occurred.")
         };
