@@ -26,6 +26,9 @@ services:
       - Jwt__Issuer=PetRadar
       - Jwt__Audience=PetRadar
       - Jwt__ExpiresInMinutes=60
+      - LocalStorage__BasePath=${MEDIA_BASE_PATH}
+    volumes:
+      - media_data:${MEDIA_BASE_PATH}
     depends_on:
       - mongo
       - redis
@@ -40,3 +43,4 @@ services:
 
 volumes:
   mongo_data:
+  media_data:
