@@ -1,8 +1,6 @@
-using Animals.Application.Interfaces;
 using Media.Application.Commands.UploadMedia;
 using Media.Application.Interfaces.Persistence;
 using Media.Application.Interfaces.Storage;
-using Media.Infrastructure.Adapters;
 using Media.Infrastructure.Options;
 using Media.Infrastructure.Persistence;
 using Media.Infrastructure.Persistence.Documents;
@@ -31,7 +29,6 @@ public static class MediaModule
 
         services.AddScoped<IMediaStorage, LocalMediaStorage>();
         services.AddScoped<IMediaRepository, MongoMediaRepository>();
-        services.AddScoped<IMediaValidator, MediaValidatorAdapter>();
 
         return services;
     }

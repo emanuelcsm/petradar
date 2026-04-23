@@ -1,4 +1,5 @@
 using Animals.Application.Commands.CreateAnimalPost;
+using Animals.Application.Integration.Interfaces;
 using Animals.Application.Interfaces;
 using Animals.Infrastructure.Persistence;
 using Animals.Infrastructure.Persistence.Documents;
@@ -42,7 +43,12 @@ public static class AnimalsModule
             return collection;
         });
 
+        services.AddSingleton(sp =>
+            sp.GetRequiredService<IMongoDatabase>()
+              .GetCollection<KnownMediaDocument>("animals_known_media"));
+
         services.AddScoped<IAnimalRepository, MongoAnimalRepository>();
+        services.AddScoped<IKnownMediaRepository, MongoKnownMediaRepository>();
 
         return services;
     }
