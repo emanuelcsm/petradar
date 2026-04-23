@@ -27,6 +27,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseGlobalExceptionMiddleware();
 app.UseHttpsRedirection();
+app.UseLocalMediaStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

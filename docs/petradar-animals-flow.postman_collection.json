@@ -117,6 +117,74 @@
       "response": []
     },
     {
+      "name": "Media - Upload (auth, save media id)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('uploadedMediaId', '');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "",
+              "pm.test('response has media id', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.have.property('mediaId');",
+              "  pm.expect(json.data.mediaId).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "if (json && json.data && json.data.mediaId) {",
+              "  pm.collectionVariables.set('uploadedMediaId', json.data.mediaId);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "{{testImagePath}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/media",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "media"
+          ]
+        },
+        "description": "Expected status: 200 OK and mediaId at data.mediaId. Configure testImagePath with an absolute path to a local .jpg, .png or .webp file."
+      },
+      "response": []
+    },
+    {
       "name": "Animals - Create Post (auth)",
       "event": [
         {
@@ -145,7 +213,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"description\": \"Golden retriever sem coleira visto perto da praca central\",\n  \"latitude\": -23.55052,\n  \"longitude\": -46.633308,\n  \"mediaIds\": []\n}"
+          "raw": "{\n  \"description\": \"Golden retriever sem coleira visto perto da praca central\",\n  \"latitude\": -23.55052,\n  \"longitude\": -46.633308,\n  \"mediaIds\": [\"{{uploadedMediaId}}\"]\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/animals",
@@ -187,6 +255,7 @@
               "",
               "var items = (json && json.data) ? json.data : [];",
               "var loggedUserId = pm.collectionVariables.get('loggedUserId');",
+              "var uploadedMediaId = pm.collectionVariables.get('uploadedMediaId');",
               "var mine = items.find(function (x) {",
               "  return x && x.userId === loggedUserId && x.status === 'Lost';",
               "});",
@@ -198,6 +267,16 @@
               "pm.test('animalPostId was captured', function () {",
               "  var id = pm.collectionVariables.get('animalPostId');",
               "  pm.expect(id).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "pm.test('created post contains uploaded media', function () {",
+              "  pm.expect(mine).to.exist;",
+              "  pm.expect(mine.media).to.be.an('array').that.is.not.empty;",
+              "  var mediaItem = mine.media.find(function (m) {",
+              "    return m && m.mediaId === uploadedMediaId;",
+              "  });",
+              "  pm.expect(mediaItem).to.exist;",
+              "  pm.expect(mediaItem.url).to.be.a('string').and.not.empty;",
               "});"
             ]
           }
@@ -281,6 +360,70 @@
         "description": "Expected status: 204 No Content"
       },
       "response": []
+    },
+    {
+      "name": "Animals - Nearby (validate found status)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "var items = (json && json.data) ? json.data : [];",
+              "var animalPostId = pm.collectionVariables.get('animalPostId');",
+              "",
+              "var foundPost = items.find(function (x) {",
+              "  return x && x.id === animalPostId;",
+              "});",
+              "",
+              "pm.test('marked post is returned as Found', function () {",
+              "  pm.expect(foundPost).to.exist;",
+              "  pm.expect(foundPost.status).to.eql('Found');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/animals/nearby?lat=-23.55052&lng=-46.633308&radius=10&pageSize=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "animals",
+            "nearby"
+          ],
+          "query": [
+            {
+              "key": "lat",
+              "value": "-23.55052"
+            },
+            {
+              "key": "lng",
+              "value": "-46.633308"
+            },
+            {
+              "key": "radius",
+              "value": "10"
+            },
+            {
+              "key": "pageSize",
+              "value": "20"
+            }
+          ]
+        },
+        "description": "Expected status: 200 OK and the previously updated post returned with status Found"
+      },
+      "response": []
     }
   ],
   "variable": [
@@ -302,6 +445,14 @@
     },
     {
       "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "testImagePath",
+      "value": ""
+    },
+    {
+      "key": "uploadedMediaId",
       "value": ""
     },
     {
