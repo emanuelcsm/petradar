@@ -7,5 +7,6 @@ public sealed record GetAnimalsByLocationResult(
     string Status,
     double Latitude,
     double Longitude,
+    IReadOnlyList<AnimalMediaResult> Media,
     IReadOnlyList<string> MediaIds,
     DateTime CreatedAt);

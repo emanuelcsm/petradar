@@ -1,3 +1,4 @@
+using Animals.Application.Integration.Interfaces;
 using Animals.Application.Interfaces;
 using Animals.Domain.Exceptions;
 using MediatR;
@@ -10,10 +11,14 @@ public sealed class GetAnimalsByLocationQueryHandler
     : IRequestHandler<GetAnimalsByLocationQuery, CursorPage<GetAnimalsByLocationResult>>
 {
     private readonly IAnimalRepository _animalRepository;
+    private readonly IKnownMediaRepository _knownMediaRepository;
 
-    public GetAnimalsByLocationQueryHandler(IAnimalRepository animalRepository)
+    public GetAnimalsByLocationQueryHandler(
+        IAnimalRepository animalRepository,
+        IKnownMediaRepository knownMediaRepository)
     {
         _animalRepository = animalRepository;
+        _knownMediaRepository = knownMediaRepository;
     }
 
     public async Task<CursorPage<GetAnimalsByLocationResult>> Handle(
@@ -56,6 +61,16 @@ public sealed class GetAnimalsByLocationQueryHandler
                 pageItems[^1].Id)
             : null;
 
+        var pageMediaIds = pageItems
+            .SelectMany(animal => animal.MediaIds)
+            .Distinct()
+            .ToList();
+
+        var knownMedia = await _knownMediaRepository.GetByIdsAsync(pageMediaIds, cancellationToken);
+
+        var knownMediaById = knownMedia
+            .ToDictionary(media => media.MediaId, media => media.PublicUrl, StringComparer.Ordinal);
+
         var data = pageItems
             .Select(animal => new GetAnimalsByLocationResult(
                 Id: animal.Id,
@@ -64,6 +79,12 @@ public sealed class GetAnimalsByLocationQueryHandler
                 Status: animal.Status.Value,
                 Latitude: animal.Location.Latitude,
                 Longitude: animal.Location.Longitude,
+                Media: animal.MediaIds
+                    .Where(mediaId => knownMediaById.ContainsKey(mediaId))
+                    .Select(mediaId => new AnimalMediaResult(
+                        MediaId: mediaId,
+                        Url: knownMediaById[mediaId]))
+                    .ToList(),
                 MediaIds: animal.MediaIds,
                 CreatedAt: animal.CreatedAt))
             .ToList();
