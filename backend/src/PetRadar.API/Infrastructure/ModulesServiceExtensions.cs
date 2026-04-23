@@ -1,6 +1,7 @@
 using Animals.Infrastructure;
 using Identity.Infrastructure;
 using Media.Infrastructure;
+using Notifications.Infrastructure;
 
 namespace PetRadar.API.Infrastructure;
 
@@ -12,6 +13,7 @@ internal static class ModulesServiceExtensions
     {
         services.AddAnimalsModule();
         services.AddIdentityModule(configuration);
+        services.AddNotificationsModule();
         services.AddMediaModule(configuration);
 
         return services;
