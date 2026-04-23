@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Media.Application\Media.Application.csproj" />
+    <ProjectReference Include="..\..\Animals\Animals.Application\Animals.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
