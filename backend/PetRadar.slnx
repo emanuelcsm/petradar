@@ -3,6 +3,9 @@
     <Project Path="src/PetRadar.API/PetRadar.API.csproj" />
     <Project Path="src/PetRadar.SharedKernel/PetRadar.SharedKernel.csproj" />
   </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/PetRadar.IntegrationEvents/PetRadar.IntegrationEvents.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/" />
   <Folder Name="/src/Modules/Animals/">
     <Project Path="src/Modules/Animals/Animals.Application/Animals.Application.csproj" />
