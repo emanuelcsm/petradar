@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\PetRadar.SharedKernel\PetRadar.SharedKernel.csproj" />
     <ProjectReference Include="..\Media.Domain\Media.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PetRadar.IntegrationEvents\PetRadar.IntegrationEvents.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

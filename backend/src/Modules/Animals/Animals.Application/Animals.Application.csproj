@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Animals.Domain\Animals.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\PetRadar.IntegrationEvents\PetRadar.IntegrationEvents.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
