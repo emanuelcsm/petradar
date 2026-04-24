@@ -49,12 +49,18 @@ export interface LoginResponseDto {
   name: string
 }
 
+export interface TipPayloadDto {
+  senderName: string
+  tipMessage: string
+}
+
 export interface NotificationDto {
   id: string
   eventName: string
   message: string
   createdAt: string
   read: boolean
+  tipPayload?: TipPayloadDto
 }
 
 export interface UploadMediaResponseDto {
@@ -81,4 +87,10 @@ export interface SendTipDto {
 
 export interface AnimalDeletedEventDto {
   animalPostId: string
+}
+
+export interface NewNotificationEventDto {
+  animalPostId: string
+  senderName: string
+  message: string
 }

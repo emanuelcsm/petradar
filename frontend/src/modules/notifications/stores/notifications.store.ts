@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { notificationsService } from '../services/notifications.service'
-import type { NotificationDto, AnimalFoundEventDto } from '@/types/api.types'
+import type { NotificationDto, AnimalFoundEventDto, NewNotificationEventDto } from '@/types/api.types'
 
 export const useNotificationsStore = defineStore('notifications', () => {
   const items = ref<NotificationDto[]>([])
@@ -49,11 +49,29 @@ export const useNotificationsStore = defineStore('notifications', () => {
     })
   }
 
+  function addTipNotificationFromSignalR(payload: NewNotificationEventDto): void {
+    const key = `new-notification:${payload.animalPostId}:${payload.senderName}`
+    if (_seenEventKeys.has(key)) return
+    _seenEventKeys.add(key)
+
+    items.value.unshift({
+      id: `pending-tip:${payload.animalPostId}`,
+      eventName: 'new-notification',
+      message: `${payload.senderName} enviou uma dica sobre o seu animal.`,
+      createdAt: new Date().toISOString(),
+      read: false,
+      tipPayload: {
+        senderName: payload.senderName,
+        tipMessage: payload.message,
+      },
+    })
+  }
+
   async function markRead(id: string): Promise<void> {
     const item = items.value.find((n) => n.id === id)
     if (!item || item.read) return
 
-    if (id.startsWith('pending:')) {
+    if (id.startsWith('pending')) {
       item.read = true
       return
     }
@@ -86,6 +104,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     hasError,
     fetchAll,
     addFromSignalREvent,
+    addTipNotificationFromSignalR,
     markRead,
     reset,
   }

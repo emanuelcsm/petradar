@@ -5,7 +5,7 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useSignalR } from '@/composables/useSignalR'
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications.store'
 import NotificationBell from '@/modules/notifications/components/NotificationBell.vue'
-import type { AnimalFoundEventDto } from '@/types/api.types'
+import type { AnimalFoundEventDto, NewNotificationEventDto } from '@/types/api.types'
 
 const authStore = useAuthStore()
 const signalR = useSignalR()
@@ -19,9 +19,13 @@ watch(
       signalR.on<AnimalFoundEventDto>('animal-found', (payload) => {
         notificationsStore.addFromSignalREvent(payload)
       })
+      signalR.on<NewNotificationEventDto>('new-notification', (payload) => {
+        notificationsStore.addTipNotificationFromSignalR(payload)
+      })
       void notificationsStore.fetchAll()
     } else {
       signalR.off('animal-found')
+      signalR.off('new-notification')
       await signalR.disconnect()
       notificationsStore.reset()
     }

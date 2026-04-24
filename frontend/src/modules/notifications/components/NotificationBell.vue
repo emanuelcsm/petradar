@@ -2,10 +2,13 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useNotificationsStore } from '../stores/notifications.store'
 import AppSpinner from '@/components/AppSpinner.vue'
+import TipNotificationModal from './TipNotificationModal.vue'
+import type { NotificationDto, TipPayloadDto } from '@/types/api.types'
 
 const notificationsStore = useNotificationsStore()
 const isOpen = ref(false)
 const bellRef = ref<HTMLElement | null>(null)
+const selectedTip = ref<TipPayloadDto | null>(null)
 
 function toggle(): void {
   isOpen.value = !isOpen.value
@@ -20,8 +23,12 @@ function handleClickOutside(event: MouseEvent): void {
   }
 }
 
-async function handleItemClick(id: string): Promise<void> {
-  await notificationsStore.markRead(id)
+async function handleItemClick(notification: NotificationDto): Promise<void> {
+  await notificationsStore.markRead(notification.id)
+  if (notification.tipPayload) {
+    isOpen.value = false
+    selectedTip.value = notification.tipPayload
+  }
 }
 
 function formatDate(value: string): string {
@@ -100,7 +107,7 @@ onUnmounted(() => {
           :class="['notification-item', { 'notification-item--unread': !item.read }]"
           role="option"
           :aria-selected="!item.read"
-          @click="handleItemClick(item.id)"
+          @click="handleItemClick(item)"
         >
           <p class="notification-message">{{ item.message }}</p>
           <time class="notification-date" :datetime="item.createdAt">
@@ -120,6 +127,13 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+
+  <TipNotificationModal
+    v-if="selectedTip !== null"
+    :open="selectedTip !== null"
+    :tip="selectedTip"
+    @close="selectedTip = null"
+  />
 </template>
 
 <style scoped>
