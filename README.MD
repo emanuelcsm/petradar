@@ -86,6 +86,31 @@ docker-compose down -v
 
 ---
 
+## Testes e coverage (backend)
+
+Para medir cobertura do backend localmente, execute na pasta `backend`:
+
+```powershell
+Set-Location .\backend; dotnet test PetRadar.slnx --collect:"XPlat Code Coverage" --results-directory .\TestResults; reportgenerator -reports:".\TestResults\**\coverage.cobertura.xml" -targetdir:".\TestResults\CoverageReportFiltered" -reporttypes:"Html;TextSummary" -classfilters:"+*;-Microsoft.AspNetCore.OpenApi.Generated*" -filefilters:"+*;-*obj*;-*.generated.cs;-*AssemblyInfo.cs"
+```
+
+O comando acima:
+
+1. Executa todos os testes da solução.
+2. Gera arquivos Cobertura (`coverage.cobertura.xml`) em `backend/TestResults`.
+3. Consolida um relatório filtrado em `backend/TestResults/CoverageReportFiltered`.
+
+### Como ler os resultados
+
+1. Abra `backend/TestResults/CoverageReportFiltered/index.html` no navegador.
+2. Verifique os indicadores principais:
+   - **Line coverage**: percentual de linhas executadas.
+   - **Branch coverage**: percentual de caminhos condicionais cobertos.
+   - **Risk Hotspots**: classes/métodos com alta complexidade e baixa cobertura.
+3. Consulte também `backend/TestResults/CoverageReportFiltered/Summary.txt` para um resumo textual útil em CI/logs.
+
+---
+
 ## Variáveis de ambiente
 
 As variáveis são lidas do arquivo `.env` na raiz do projeto.
