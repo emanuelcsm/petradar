@@ -127,4 +127,9 @@ public sealed class AnimalPost : AggregateRoot
             Location.Longitude,
             DateTime.UtcNow));
     }
+
+    public void RegisterTip(string senderName, string message)
+    {
+        AddDomainEvent(new AnimalTipSentDomainEvent(Id, UserId, senderName, message));
+    }
 }
