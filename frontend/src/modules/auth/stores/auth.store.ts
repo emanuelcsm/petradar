@@ -71,8 +71,9 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(name: string, email: string, password: string): Promise<void> {
     error.value = null
     try {
-      const response = await authService.register(name, email, password)
-      persistAuth(response.data)
+      await authService.register(name, email, password)
+      const loginResponse = await authService.login(email, password)
+      persistAuth(loginResponse.data)
     } catch (e: unknown) {
       error.value = mapAuthError(e, 'register')
     }

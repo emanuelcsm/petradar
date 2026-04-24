@@ -10,12 +10,7 @@ export const authService = {
     return data
   },
 
-  async register(name: string, email: string, password: string): Promise<ApiResponse<LoginResponseDto>> {
-    const { data } = await api.post<ApiResponse<LoginResponseDto>>('/api/auth/register', {
-      name,
-      email,
-      password,
-    })
-    return data
+  async register(name: string, email: string, password: string): Promise<void> {
+    await api.post('/api/auth/register', { name, email, password })
   },
 }
