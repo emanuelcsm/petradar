@@ -8,7 +8,7 @@ import AnimalCard from '../components/AnimalCard.vue'
 import AppSpinner from '@/components/AppSpinner.vue'
 import AppEmptyState from '@/components/AppEmptyState.vue'
 import AppButton from '@/components/AppButton.vue'
-import type { AnimalPostedEventDto } from '@/types/api.types'
+import type { AnimalPostedEventDto, AnimalFoundEventDto, AnimalDeletedEventDto } from '@/types/api.types'
 
 const FEED_RADIUS_KM = 10
 
@@ -36,12 +36,20 @@ onMounted(async () => {
       signalR.on<AnimalPostedEventDto>('animal-posted', (payload) => {
         void animalsStore.handleAnimalPostedEvent(payload)
       })
+      signalR.on<AnimalFoundEventDto>('animal-found', (payload) => {
+        animalsStore.updateStatusById(payload.animalPostId, 'Found')
+      })
+      signalR.on<AnimalDeletedEventDto>('animal-deleted', (payload) => {
+        animalsStore.removeById(payload.animalPostId)
+      })
     }
   }
 })
 
 onUnmounted(() => {
   signalR.off('animal-posted')
+  signalR.off('animal-found')
+  signalR.off('animal-deleted')
   if (_currentRegionKey !== null) {
     void signalR.leaveRegion(_currentRegionKey)
   }

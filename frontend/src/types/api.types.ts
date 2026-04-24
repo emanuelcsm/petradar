@@ -78,3 +78,7 @@ export interface AnimalFoundEventDto {
 export interface SendTipDto {
   message: string
 }
+
+export interface AnimalDeletedEventDto {
+  animalPostId: string
+}

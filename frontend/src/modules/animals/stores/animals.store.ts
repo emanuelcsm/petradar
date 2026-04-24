@@ -139,6 +139,20 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
+  function updateStatusById(id: string, status: 'Lost' | 'Found'): void {
+    const item = items.value.find((a) => a.id === id)
+    if (item) {
+      item.status = status
+    }
+  }
+
+  function removeById(id: string): void {
+    items.value = items.value.filter((a) => a.id !== id)
+    if (selectedAnimal.value?.id === id) {
+      selectedAnimal.value = null
+    }
+  }
+
   return {
     items,
     nextPageToken,
@@ -163,5 +177,7 @@ export const useAnimalsStore = defineStore('animals', () => {
     isDeletingAnimal,
     sendTip,
     removeAnimal,
+    updateStatusById,
+    removeById,
   }
 })
