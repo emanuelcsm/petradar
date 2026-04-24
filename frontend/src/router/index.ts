@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
+declare module 'vue-router' {
+  interface RouteMeta {
+    public?: boolean
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -35,8 +41,13 @@ const router = createRouter({
 
 router.beforeEach(to => {
   const auth = useAuthStore()
+
   if (!to.meta.public && !auth.isAuthenticated) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.public && auth.isAuthenticated) {
+    return { name: 'feed' }
   }
 })
 
