@@ -116,4 +116,15 @@ public sealed class AnimalPost : AggregateRoot
 
         AddDomainEvent(new AnimalFoundEvent(Id, UserId, DateTime.UtcNow));
     }
+
+    public void Delete()
+    {
+        AddDomainEvent(new AnimalPostDeletedDomainEvent(
+            Id,
+            UserId,
+            MediaIds,
+            Location.Latitude,
+            Location.Longitude,
+            DateTime.UtcNow));
+    }
 }
