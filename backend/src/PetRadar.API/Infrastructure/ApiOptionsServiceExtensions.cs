@@ -1,4 +1,5 @@
 using PetRadar.API.Infrastructure.Options;
+using PetRadar.API.Infrastructure.Validation.Animals;
 using PetRadar.API.Infrastructure.Validation.Media;
 
 namespace PetRadar.API.Infrastructure;
@@ -41,6 +42,7 @@ internal static class ApiOptionsServiceExtensions
             .ValidateOnStart();
 
         services.AddScoped<IMediaUploadRequestValidator, MediaUploadRequestValidator>();
+        services.AddScoped<IDeleteAnimalPostValidator, DeleteAnimalPostValidator>();
 
         return services;
     }
