@@ -12,6 +12,10 @@ export const useAnimalsStore = defineStore('animals', () => {
   const isCreating = ref(false)
   const createError = ref<string | null>(null)
 
+  const selectedAnimal = ref<AnimalCardDto | null>(null)
+  const isLoadingDetail = ref(false)
+  const detailError = ref<string | null>(null)
+
   const hasItems = computed(() => items.value.length > 0)
   const hasError = computed(() => error.value !== null)
 
@@ -84,6 +88,32 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
+  async function fetchById(id: string): Promise<void> {
+    isLoadingDetail.value = true
+    detailError.value = null
+    try {
+      const result = await animalsService.getById(id)
+      selectedAnimal.value = result.data
+    } catch {
+      detailError.value = 'Não foi possível carregar o animal.'
+    } finally {
+      isLoadingDetail.value = false
+    }
+  }
+
+  async function markFoundById(id: string): Promise<void> {
+    try {
+      await animalsService.markFound(id)
+      if (selectedAnimal.value?.id === id) {
+        selectedAnimal.value = { ...selectedAnimal.value, status: 'Found' }
+      }
+      const itemInFeed = items.value.find((a) => a.id === id)
+      if (itemInFeed) itemInFeed.status = 'Found'
+    } catch {
+      // falha silenciosa — UI permanece no estado anterior
+    }
+  }
+
   return {
     items,
     nextPageToken,
@@ -92,6 +122,9 @@ export const useAnimalsStore = defineStore('animals', () => {
     error,
     isCreating,
     createError,
+    selectedAnimal,
+    isLoadingDetail,
+    detailError,
     hasItems,
     hasError,
     fetchNearby,
@@ -99,5 +132,7 @@ export const useAnimalsStore = defineStore('animals', () => {
     createAnimal,
     addFromSignalR,
     handleAnimalPostedEvent,
+    fetchById,
+    markFoundById,
   }
 })

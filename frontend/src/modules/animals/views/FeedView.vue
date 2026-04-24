@@ -92,7 +92,7 @@ async function loadMore(): Promise<void> {
         >
           <path d="M4.5 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm15 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM7 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm10 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM12 22c3.5 0 7-2.5 7-7 0-2.5-1.5-4.5-3.5-5.5-.5-.3-1-.5-1.5-.7-.5-.2-1-.3-2-.3s-1.5.1-2 .3c-.5.2-1 .4-1.5.7C6.5 10.5 5 12.5 5 15c0 4.5 3.5 7 7 7z"/>
         </svg>
-        <span class="brand-name">PetRadar</span>
+        <span class="brand-name">Pet Radar</span>
       </div>
       <p class="feed-subtitle">Animais perdidos na sua região</p>
     </header>

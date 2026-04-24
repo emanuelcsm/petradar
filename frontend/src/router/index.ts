@@ -36,6 +36,11 @@ const router = createRouter({
       name: 'post-animal',
       component: () => import('@/modules/animals/views/PostAnimalView.vue'),
     },
+    {
+      path: '/animals/:id',
+      name: 'animal-detail',
+      component: () => import('@/modules/animals/views/AnimalDetailView.vue'),
+    },
   ],
 })
 

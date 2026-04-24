@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import AnimalStatusBadge from './AnimalStatusBadge.vue'
 import type { AnimalCardDto } from '@/types/api.types'
 
@@ -29,6 +30,7 @@ const relativeTime = computed(() => {
 </script>
 
 <template>
+  <RouterLink :to="{ name: 'animal-detail', params: { id: animal.id } }" class="animal-card-link">
   <article class="animal-card">
     <div class="image-wrapper">
       <img
@@ -86,9 +88,16 @@ const relativeTime = computed(() => {
       </div>
     </div>
   </article>
+  </RouterLink>
 </template>
 
 <style scoped>
+.animal-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
 .animal-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
