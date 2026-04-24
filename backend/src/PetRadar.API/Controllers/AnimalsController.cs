@@ -1,6 +1,7 @@
 using Animals.Application.Commands.CreateAnimalPost;
 using Animals.Application.Commands.DeleteAnimalPost;
 using Animals.Application.Commands.MarkAsFound;
+using Animals.Application.Commands.SendTip;
 using Animals.Application.Queries.GetAnimalById;
 using Animals.Application.Queries.GetAnimalsByLocation;
 using MediatR;
@@ -24,15 +25,18 @@ public sealed class AnimalsController : ControllerBase
     private readonly ISender _sender;
     private readonly CursorPaginationOptions _cursorPaginationOptions;
     private readonly IDeleteAnimalPostValidator _deleteAnimalPostValidator;
+    private readonly ISendTipValidator _sendTipValidator;
 
     public AnimalsController(
         ISender sender,
         IOptions<CursorPaginationOptions> cursorPaginationOptions,
-        IDeleteAnimalPostValidator deleteAnimalPostValidator)
+        IDeleteAnimalPostValidator deleteAnimalPostValidator,
+        ISendTipValidator sendTipValidator)
     {
         _sender = sender;
         _cursorPaginationOptions = cursorPaginationOptions.Value;
         _deleteAnimalPostValidator = deleteAnimalPostValidator;
+        _sendTipValidator = sendTipValidator;
     }
 
     [HttpPost]
@@ -151,6 +155,29 @@ public sealed class AnimalsController : ControllerBase
         var command = new MarkAsFoundCommand(
             AnimalPostId: id,
             RequesterUserId: requesterUserId);
+
+        await _sender.Send(command, cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id}/tips")]
+    [Authorize]
+    public async Task<IActionResult> SendTip(
+        [FromRoute] string id,
+        [FromBody] SendTipRequest request,
+        CancellationToken cancellationToken)
+    {
+        _sendTipValidator.Validate(request.Message);
+
+        var senderId   = User.GetRequiredUserId();
+        var senderName = User.GetRequiredUserName();
+
+        var command = new SendTipCommand(
+            AnimalId:   id,
+            SenderId:   senderId,
+            SenderName: senderName,
+            Message:    request.Message);
 
         await _sender.Send(command, cancellationToken);
 

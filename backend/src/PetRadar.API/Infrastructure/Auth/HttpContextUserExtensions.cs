@@ -14,4 +14,14 @@ internal static class HttpContextUserExtensions
 
         return userId;
     }
+
+    internal static string GetRequiredUserName(this ClaimsPrincipal user)
+    {
+        var name = user.FindFirstValue(JwtRegisteredClaimNames.Name);
+
+        if (string.IsNullOrWhiteSpace(name))
+            throw new AuthenticatedUserNameMissingException();
+
+        return name;
+    }
 }
