@@ -50,7 +50,9 @@ public sealed class NotificationsController : ControllerBase
                 EventName: notification.EventName,
                 Message: notification.Message,
                 CreatedAt: notification.CreatedAt,
-                Read: notification.Read))
+                Read: notification.Read,
+                TipSenderName: notification.TipSenderName,
+                TipMessage: notification.TipMessage))
             .ToList();
 
         return Ok(response.ToPagedResponse(

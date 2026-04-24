@@ -25,9 +25,12 @@ function handleClickOutside(event: MouseEvent): void {
 
 async function handleItemClick(notification: NotificationDto): Promise<void> {
   await notificationsStore.markRead(notification.id)
-  if (notification.tipPayload) {
+  if (notification.tipSenderName && notification.tipMessage) {
     isOpen.value = false
-    selectedTip.value = notification.tipPayload
+    selectedTip.value = {
+      senderName: notification.tipSenderName,
+      tipMessage: notification.tipMessage,
+    }
   }
 }
 

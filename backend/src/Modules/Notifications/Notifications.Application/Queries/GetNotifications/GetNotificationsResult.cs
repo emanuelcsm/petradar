@@ -6,4 +6,5 @@ public sealed record GetNotificationsResult(
     string Message,
     DateTime CreatedAt,
     bool Read,
-    object? Payload = null);
+    string? TipSenderName = null,
+    string? TipMessage = null);

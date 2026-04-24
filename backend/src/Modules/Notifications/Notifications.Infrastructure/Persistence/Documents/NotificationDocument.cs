@@ -36,6 +36,14 @@ internal sealed class NotificationDocument
     [BsonIgnoreIfNull]
     public BsonDocument? Payload { get; set; }
 
+    [BsonElement("tipSenderName")]
+    [BsonIgnoreIfNull]
+    public string? TipSenderName { get; set; }
+
+    [BsonElement("tipMessage")]
+    [BsonIgnoreIfNull]
+    public string? TipMessage { get; set; }
+
     public static NotificationDocument FromWriteModel(NotificationWriteModel model)
     {
         return new NotificationDocument
@@ -47,7 +55,9 @@ internal sealed class NotificationDocument
             Read = false,
             UserId = model.UserId,
             RegionKey = model.RegionKey,
-            Payload = model.Payload is null ? null : model.Payload.ToBsonDocument()
+            Payload = model.Payload is null ? null : model.Payload.ToBsonDocument(),
+            TipSenderName = model.TipSenderName,
+            TipMessage = model.TipMessage,
         };
     }
 }

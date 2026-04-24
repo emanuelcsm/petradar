@@ -5,4 +5,6 @@ public sealed record NotificationResponse(
     string EventName,
     string Message,
     DateTime CreatedAt,
-    bool Read);
+    bool Read,
+    string? TipSenderName = null,
+    string? TipMessage = null);

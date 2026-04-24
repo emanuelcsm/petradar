@@ -45,7 +45,8 @@ public sealed class GetNotificationsQueryHandler
                 Message: notification.Message,
                 CreatedAt: notification.CreatedAt,
                 Read: notification.Read,
-                Payload: notification.Payload))
+                TipSenderName: notification.TipSenderName,
+                TipMessage: notification.TipMessage))
             .ToList();
 
         return new CursorPage<GetNotificationsResult>(

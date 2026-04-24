@@ -6,4 +6,6 @@ public sealed record NotificationWriteModel(
     DateTime CreatedAt,
     string? UserId = null,
     string? RegionKey = null,
-    object? Payload = null);
+    object? Payload = null,
+    string? TipSenderName = null,
+    string? TipMessage = null);

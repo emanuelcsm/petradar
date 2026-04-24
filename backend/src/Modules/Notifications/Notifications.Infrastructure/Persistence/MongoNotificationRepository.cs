@@ -99,6 +99,7 @@ internal sealed class MongoNotificationRepository : INotificationRepository
             Message: document.Message,
             CreatedAt: document.CreatedAt,
             Read: document.Read,
-            Payload: document.Payload);
+            TipSenderName: document.TipSenderName,
+            TipMessage: document.TipMessage);
     }
 }

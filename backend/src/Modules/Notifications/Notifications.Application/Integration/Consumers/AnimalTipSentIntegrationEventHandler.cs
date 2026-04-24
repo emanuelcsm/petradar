@@ -29,11 +29,13 @@ public sealed class AnimalTipSentIntegrationEventHandler : INotificationHandler<
         };
 
         var notificationRecord = new NotificationWriteModel(
-            EventName: eventName,
-            Message:   $"{notification.SenderName} enviou uma dica sobre o seu animal.",
-            CreatedAt: notification.OccurredOn,
-            UserId:    notification.OwnerId,
-            Payload:   payload);
+            EventName:     eventName,
+            Message:       $"{notification.SenderName} enviou uma dica sobre o seu animal.",
+            CreatedAt:     notification.OccurredOn,
+            UserId:        notification.OwnerId,
+            Payload:       payload,
+            TipSenderName: notification.SenderName,
+            TipMessage:    notification.Message);
 
         await _notificationRepository.SaveAsync(notificationRecord, cancellationToken);
 

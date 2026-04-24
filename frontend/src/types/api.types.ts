@@ -60,7 +60,8 @@ export interface NotificationDto {
   message: string
   createdAt: string
   read: boolean
-  tipPayload?: TipPayloadDto
+  tipSenderName?: string
+  tipMessage?: string
 }
 
 export interface UploadMediaResponseDto {
