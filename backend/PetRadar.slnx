@@ -27,6 +27,11 @@
     <Project Path="src/Modules/Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Animals.Application.Tests/Animals.Application.Tests.csproj" />
+    <Project Path="tests/Animals.Domain.Tests/Animals.Domain.Tests.csproj" />
+    <Project Path="tests/Identity.Application.Tests/Identity.Application.Tests.csproj" />
     <Project Path="tests/Identity.Domain.Tests/Identity.Domain.Tests.csproj" />
+    <Project Path="tests/Media.Domain.Tests/Media.Domain.Tests.csproj" />
+    <Project Path="tests/PetRadar.API.Infrastructure.Tests/PetRadar.API.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>
