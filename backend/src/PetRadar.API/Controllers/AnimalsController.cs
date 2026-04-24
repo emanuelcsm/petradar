@@ -1,4 +1,5 @@
 using Animals.Application.Commands.CreateAnimalPost;
+using Animals.Application.Commands.DeleteAnimalPost;
 using Animals.Application.Commands.MarkAsFound;
 using Animals.Application.Queries.GetAnimalById;
 using Animals.Application.Queries.GetAnimalsByLocation;
@@ -11,6 +12,7 @@ using PetRadar.API.Contracts.Animals.Responses;
 using PetRadar.API.Infrastructure.Auth;
 using PetRadar.API.Infrastructure.Options;
 using PetRadar.API.Infrastructure.Responses;
+using PetRadar.API.Infrastructure.Validation.Animals;
 using PetRadar.SharedKernel.ValueObjects;
 
 namespace PetRadar.API.Controllers;
@@ -21,13 +23,16 @@ public sealed class AnimalsController : ControllerBase
 {
     private readonly ISender _sender;
     private readonly CursorPaginationOptions _cursorPaginationOptions;
+    private readonly IDeleteAnimalPostValidator _deleteAnimalPostValidator;
 
     public AnimalsController(
         ISender sender,
-        IOptions<CursorPaginationOptions> cursorPaginationOptions)
+        IOptions<CursorPaginationOptions> cursorPaginationOptions,
+        IDeleteAnimalPostValidator deleteAnimalPostValidator)
     {
         _sender = sender;
         _cursorPaginationOptions = cursorPaginationOptions.Value;
+        _deleteAnimalPostValidator = deleteAnimalPostValidator;
     }
 
     [HttpPost]
@@ -114,6 +119,25 @@ public sealed class AnimalsController : ControllerBase
         return Ok(response.ToPagedResponse(
             nextPageToken: result.NextPageToken,
             hasNextPage: result.HasNextPage));
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IActionResult> Delete(
+        [FromRoute] string id,
+        CancellationToken cancellationToken)
+    {
+        _deleteAnimalPostValidator.Validate(id);
+
+        var requesterUserId = User.GetRequiredUserId();
+
+        var command = new DeleteAnimalPostCommand(
+            AnimalPostId: id,
+            RequesterUserId: requesterUserId);
+
+        await _sender.Send(command, cancellationToken);
+
+        return NoContent();
     }
 
     [HttpPatch("{id}/found")]
