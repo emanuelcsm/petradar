@@ -8,7 +8,6 @@ export interface PagedApiResponse<T> {
   pagination: {
     nextPageToken: string | null
     hasNextPage: boolean
-    pageSize: number
   }
   success: boolean
 }

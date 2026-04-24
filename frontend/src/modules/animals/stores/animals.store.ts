@@ -1,11 +1,61 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { animalsService } from '../services/animals.service'
+import type { AnimalCardDto } from '@/types/api.types'
 
 export const useAnimalsStore = defineStore('animals', () => {
+  const items = ref<AnimalCardDto[]>([])
+  const nextPageToken = ref<string | null>(null)
+  const hasNextPage = ref(false)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
+  const hasItems = computed(() => items.value.length > 0)
   const hasError = computed(() => error.value !== null)
 
-  return { isLoading, error, hasError }
+  async function fetchNearby(
+    lat: number,
+    lng: number,
+    radius: number,
+    pageToken?: string,
+  ): Promise<void> {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const result = await animalsService.getNearby(lat, lng, radius, pageToken)
+
+      if (pageToken) {
+        items.value.push(...result.data)
+      } else {
+        items.value = result.data
+      }
+
+      nextPageToken.value = result.pagination.nextPageToken
+      hasNextPage.value = result.pagination.hasNextPage
+    } catch {
+      error.value = 'Não foi possível carregar os animais.'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function addFromSignalR(animal: AnimalCardDto): void {
+    const exists = items.value.some((a) => a.id === animal.id)
+    if (!exists) {
+      items.value.unshift(animal)
+    }
+  }
+
+  return {
+    items,
+    nextPageToken,
+    hasNextPage,
+    isLoading,
+    error,
+    hasItems,
+    hasError,
+    fetchNearby,
+    addFromSignalR,
+  }
 })

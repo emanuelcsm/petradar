@@ -3,12 +3,15 @@ import type { AnimalCardDto, PagedApiResponse, UploadMediaResponseDto, ApiRespon
 
 export const animalsService = {
   async getNearby(
-    _lat: number,
-    _lng: number,
-    _pageToken?: string,
+    lat: number,
+    lng: number,
+    radius: number,
+    pageToken?: string,
+    pageSize?: number,
   ): Promise<PagedApiResponse<AnimalCardDto>> {
-    const params: Record<string, unknown> = { lat: _lat, lng: _lng }
-    if (_pageToken) params.nextPageToken = _pageToken
+    const params: Record<string, unknown> = { lat, lng, radius }
+    if (pageToken) params.nextPageToken = pageToken
+    if (pageSize) params.pageSize = pageSize
     const { data } = await api.get<PagedApiResponse<AnimalCardDto>>('/api/animals/nearby', { params })
     return data
   },
