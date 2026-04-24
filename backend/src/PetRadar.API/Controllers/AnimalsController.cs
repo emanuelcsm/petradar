@@ -1,5 +1,6 @@
 using Animals.Application.Commands.CreateAnimalPost;
 using Animals.Application.Commands.MarkAsFound;
+using Animals.Application.Queries.GetAnimalById;
 using Animals.Application.Queries.GetAnimalsByLocation;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +47,30 @@ public sealed class AnimalsController : ControllerBase
         await _sender.Send(command, cancellationToken);
 
         return StatusCode(StatusCodes.Status201Created);
+    }
+
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(
+        [FromRoute] string id,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetAnimalByIdQuery(AnimalPostId: id);
+        var result = await _sender.Send(query, cancellationToken);
+
+        var response = new NearbyAnimalResponse(
+            Id: result.Id,
+            UserId: result.UserId,
+            Description: result.Description,
+            Status: result.Status,
+            Latitude: result.Latitude,
+            Longitude: result.Longitude,
+            Media: result.Media
+                .Select(m => new AnimalMediaResponse(MediaId: m.MediaId, Url: m.Url))
+                .ToList(),
+            CreatedAt: result.CreatedAt);
+
+        return Ok(response.ToResponse());
     }
 
     [HttpGet("nearby")]
