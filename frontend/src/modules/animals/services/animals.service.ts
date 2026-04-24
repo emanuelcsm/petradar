@@ -1,5 +1,5 @@
 import api from '@/services/api'
-import type { AnimalCardDto, PagedApiResponse, UploadMediaResponseDto, ApiResponse } from '@/types/api.types'
+import type { AnimalCardDto, PagedApiResponse, UploadMediaResponseDto, ApiResponse, SendTipDto } from '@/types/api.types'
 
 export const animalsService = {
   async getNearby(
@@ -44,5 +44,13 @@ export const animalsService = {
     form.append('file', _file)
     const { data } = await api.post<ApiResponse<UploadMediaResponseDto>>('/api/media', form)
     return data
+  },
+
+  async sendTip(animalId: string, payload: SendTipDto): Promise<void> {
+    await api.post(`/api/animals/${animalId}/tips`, payload)
+  },
+
+  async deletePost(animalId: string): Promise<void> {
+    await api.delete(`/api/animals/${animalId}`)
   },
 }

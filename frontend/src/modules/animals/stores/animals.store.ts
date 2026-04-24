@@ -16,6 +16,9 @@ export const useAnimalsStore = defineStore('animals', () => {
   const isLoadingDetail = ref(false)
   const detailError = ref<string | null>(null)
 
+  const isSendingTip = ref(false)
+  const isDeletingAnimal = ref(false)
+
   const hasItems = computed(() => items.value.length > 0)
   const hasError = computed(() => error.value !== null)
 
@@ -114,6 +117,28 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
+  async function sendTip(animalId: string, message: string): Promise<void> {
+    isSendingTip.value = true
+    try {
+      await animalsService.sendTip(animalId, { message })
+    } finally {
+      isSendingTip.value = false
+    }
+  }
+
+  async function removeAnimal(id: string): Promise<void> {
+    isDeletingAnimal.value = true
+    try {
+      await animalsService.deletePost(id)
+      items.value = items.value.filter((a) => a.id !== id)
+      if (selectedAnimal.value?.id === id) {
+        selectedAnimal.value = null
+      }
+    } finally {
+      isDeletingAnimal.value = false
+    }
+  }
+
   return {
     items,
     nextPageToken,
@@ -134,5 +159,9 @@ export const useAnimalsStore = defineStore('animals', () => {
     handleAnimalPostedEvent,
     fetchById,
     markFoundById,
+    isSendingTip,
+    isDeletingAnimal,
+    sendTip,
+    removeAnimal,
   }
 })

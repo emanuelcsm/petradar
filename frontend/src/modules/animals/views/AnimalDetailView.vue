@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAnimalsStore } from '../stores/animals.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useToast } from '@/composables/useToast'
 import AnimalStatusBadge from '../components/AnimalStatusBadge.vue'
 import AppSpinner from '@/components/AppSpinner.vue'
 import AppButton from '@/components/AppButton.vue'
@@ -11,13 +12,21 @@ const route = useRoute()
 const router = useRouter()
 const animalsStore = useAnimalsStore()
 const authStore = useAuthStore()
+const toast = useToast()
 
 const isMarking = ref(false)
+const showTipField = ref(false)
+const tipMessage = ref('')
+const isConfirming = ref(false)
+
+const isOwner = computed(
+  () => !!authStore.user && animalsStore.selectedAnimal?.userId === authStore.user.id,
+)
+
+const canSendTip = computed(() => authStore.isAuthenticated && !isOwner.value)
 
 const canMarkFound = computed(
-  () =>
-    animalsStore.selectedAnimal?.status === 'Lost' &&
-    authStore.user?.id === animalsStore.selectedAnimal?.userId,
+  () => animalsStore.selectedAnimal?.status === 'Lost' && isOwner.value,
 )
 
 const primaryImageUrl = computed(() => animalsStore.selectedAnimal?.media[0]?.url ?? null)
@@ -43,6 +52,34 @@ async function handleMarkFound(): Promise<void> {
   isMarking.value = true
   await animalsStore.markFoundById(animalsStore.selectedAnimal.id)
   isMarking.value = false
+}
+
+async function handleSendTip(): Promise<void> {
+  if (!animalsStore.selectedAnimal) return
+  try {
+    await animalsStore.sendTip(animalsStore.selectedAnimal.id, tipMessage.value)
+    toast.success('Dica enviada com sucesso!')
+    showTipField.value = false
+    tipMessage.value = ''
+  } catch {
+    toast.error('Não foi possível enviar a dica. Tente novamente.')
+  }
+}
+
+async function handleDeletePost(): Promise<void> {
+  if (!animalsStore.selectedAnimal) return
+  if (!isConfirming.value) {
+    isConfirming.value = true
+    return
+  }
+  try {
+    await animalsStore.removeAnimal(animalsStore.selectedAnimal.id)
+    toast.success('Post deletado com sucesso.')
+    void router.push({ name: 'feed' })
+  } catch {
+    isConfirming.value = false
+    toast.error('Não foi possível deletar o post. Tente novamente.')
+  }
 }
 
 onMounted(() => {
@@ -165,15 +202,84 @@ onMounted(() => {
           </div>
         </dl>
 
-        <div v-if="canMarkFound" class="action-area">
-          <AppButton
-            variant="primary"
-            :disabled="isMarking"
-            @click="handleMarkFound"
-          >
-            <AppSpinner v-if="isMarking" />
-            <span v-else>Marcar como encontrado</span>
-          </AppButton>
+        <div v-if="authStore.isAuthenticated" class="action-area">
+          <template v-if="isOwner">
+            <AppButton
+              v-if="canMarkFound"
+              variant="primary"
+              :disabled="isMarking"
+              @click="handleMarkFound"
+            >
+              <AppSpinner v-if="isMarking" />
+              <span v-else>Marcar como encontrado</span>
+            </AppButton>
+
+            <div class="owner-danger-area">
+              <div v-if="isConfirming" class="confirm-row">
+                <AppButton
+                  variant="ghost"
+                  :disabled="animalsStore.isDeletingAnimal"
+                  @click="isConfirming = false"
+                >
+                  Cancelar
+                </AppButton>
+                <AppButton
+                  variant="danger"
+                  :disabled="animalsStore.isDeletingAnimal"
+                  @click="handleDeletePost"
+                >
+                  <AppSpinner v-if="animalsStore.isDeletingAnimal" />
+                  <span v-else>Confirmar exclusão?</span>
+                </AppButton>
+              </div>
+              <AppButton
+                v-else
+                variant="danger"
+                @click="handleDeletePost"
+              >
+                Deletar post
+              </AppButton>
+            </div>
+          </template>
+
+          <template v-else-if="canSendTip">
+            <AppButton
+              v-if="!showTipField"
+              variant="secondary"
+              @click="showTipField = true"
+            >
+              Enviar dica
+            </AppButton>
+
+            <div v-else class="tip-field">
+              <label for="tip-message" class="tip-label">Envie uma dica ao publicador</label>
+              <textarea
+                id="tip-message"
+                v-model="tipMessage"
+                class="tip-textarea"
+                maxlength="280"
+                rows="3"
+                placeholder="Descreva onde viu o animal..."
+              />
+              <span class="tip-counter" aria-live="polite">{{ tipMessage.length }}/280</span>
+              <div class="tip-actions">
+                <AppButton
+                  variant="ghost"
+                  @click="showTipField = false; tipMessage = ''"
+                >
+                  Cancelar
+                </AppButton>
+                <AppButton
+                  variant="primary"
+                  :disabled="animalsStore.isSendingTip || tipMessage.trim() === ''"
+                  @click="handleSendTip"
+                >
+                  <AppSpinner v-if="animalsStore.isSendingTip" />
+                  <span v-else>Enviar</span>
+                </AppButton>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </template>
@@ -302,5 +408,60 @@ onMounted(() => {
 
 .action-area {
   padding-top: var(--space-2);
+}
+
+.tip-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tip-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-600);
+}
+
+.tip-textarea {
+  width: 100%;
+  resize: vertical;
+  padding: var(--space-3);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-800);
+  background: var(--color-surface);
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.tip-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+}
+
+.tip-counter {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-400);
+  text-align: right;
+}
+
+.tip-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.owner-danger-area {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.confirm-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
 }
 </style>

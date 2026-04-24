@@ -74,3 +74,7 @@ export interface AnimalFoundEventDto {
   userId: string
   foundAt: string
 }
+
+export interface SendTipDto {
+  message: string
+}
