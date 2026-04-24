@@ -33,4 +33,20 @@ internal sealed class MongoMediaRepository : IMediaRepository
 
         return count > 0;
     }
+
+    public async Task<MediaFile?> GetByIdAsync(string mediaId, CancellationToken cancellationToken = default)
+    {
+        var document = await _collection
+            .Find(x => x.Id == mediaId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return document?.ToDomain();
+    }
+
+    public async Task DeleteAsync(string mediaId, CancellationToken cancellationToken = default)
+    {
+        await _collection.DeleteOneAsync(
+            x => x.Id == mediaId,
+            cancellationToken);
+    }
 }
