@@ -15,4 +15,6 @@ public interface IAnimalRepository
         string? idBefore,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 }

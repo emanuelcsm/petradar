@@ -83,4 +83,11 @@ internal sealed class MongoAnimalRepository : IAnimalRepository
 
         return new CursorSlice<AnimalPost>(items, hasNextPage);
     }
+
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
+    {
+        await _collection.DeleteOneAsync(
+            x => x.Id == id,
+            cancellationToken);
+    }
 }
