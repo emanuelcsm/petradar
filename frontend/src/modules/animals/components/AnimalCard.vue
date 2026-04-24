@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import AppCard from '@/components/AppCard.vue'
 import AnimalStatusBadge from './AnimalStatusBadge.vue'
 import type { AnimalCardDto } from '@/types/api.types'
 
@@ -30,56 +29,93 @@ const relativeTime = computed(() => {
 </script>
 
 <template>
-  <AppCard>
-    <div class="card-inner">
-      <div class="image-wrapper">
-        <img
-          v-if="primaryImageUrl"
-          :src="primaryImageUrl"
-          :alt="`Foto de animal ${animal.status === 'Lost' ? 'perdido' : 'encontrado'}`"
-          class="animal-image"
-        />
-        <div v-else class="image-placeholder" aria-hidden="true">
-          <span class="placeholder-icon">🐾</span>
-        </div>
+  <article class="animal-card">
+    <div class="image-wrapper">
+      <img
+        v-if="primaryImageUrl"
+        :src="primaryImageUrl"
+        :alt="`Foto de animal ${animal.status === 'Lost' ? 'perdido' : 'encontrado'}`"
+        class="animal-image"
+      />
+      <div v-else class="image-placeholder" aria-hidden="true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="placeholder-icon"
+        >
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
       </div>
 
-      <div class="card-body">
-        <div class="card-header">
-          <AnimalStatusBadge :status="animal.status" />
-          <span class="time">{{ relativeTime }}</span>
-        </div>
-
-        <p class="description">{{ animal.description }}</p>
-
-        <p class="location">
-          <span class="location-label">Localização aprox.:</span>
-          {{ approximateLocation }}
-        </p>
+      <div class="badge-overlay">
+        <AnimalStatusBadge :status="animal.status" />
       </div>
     </div>
-  </AppCard>
+
+    <div class="card-body">
+      <p class="description">{{ animal.description }}</p>
+
+      <div class="card-footer">
+        <span class="location">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          {{ approximateLocation }}
+        </span>
+        <span class="time">{{ relativeTime }}</span>
+      </div>
+    </div>
+  </article>
 </template>
 
 <style scoped>
-.card-inner {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.animal-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-neutral-200);
+  overflow: hidden;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.animal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .image-wrapper {
+  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border-radius: var(--radius-md);
+  aspect-ratio: 4 / 3;
   background: var(--color-neutral-100);
+  overflow: hidden;
 }
 
 .animal-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .image-placeholder {
@@ -91,42 +127,50 @@ const relativeTime = computed(() => {
 }
 
 .placeholder-icon {
-  font-size: var(--font-size-3xl);
+  color: var(--color-neutral-400);
+}
+
+.badge-overlay {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
 }
 
 .card-body {
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.time {
-  font-size: var(--font-size-xs);
-  color: var(--color-neutral-400);
-}
-
 .description {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   color: var(--color-neutral-800);
   line-height: var(--line-height-normal);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  margin: 0;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   font-size: var(--font-size-xs);
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-400);
 }
 
-.location-label {
-  font-weight: var(--font-weight-medium);
+.time {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-400);
 }
 </style>
