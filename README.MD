@@ -131,4 +131,14 @@ O backend segue **Monolito Modular** com Clean Architecture por módulo.
 Comunicação entre módulos via Domain Events (MediatR). Isolamento de dados
 via convenção de prefixo de coleção no MongoDB.
 
+### Notifications API
+
+- `GET /api/notifications`: lista notificações do usuário autenticado com
+   paginação cursor-based (`nextPageToken`, `hasNextPage`).
+- `PATCH /api/notifications/{id}/read`: marca notificação como lida.
+
+Regra de consistência eventual: como a notificação é gerada a partir de eventos de
+integração, ela pode aparecer com pequeno atraso após a ação que originou o evento.
+Não existe consulta cross-module para montar a resposta do endpoint.
+
 Detalhes completos em [`../architecture.md`](../architecture.md).
