@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace PetRadar.API.Hubs;
+namespace Notifications.Infrastructure.Realtime;
 
 public sealed class AnimalHub : Hub
 {

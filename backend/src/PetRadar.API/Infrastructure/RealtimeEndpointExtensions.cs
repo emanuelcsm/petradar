@@ -1,4 +1,4 @@
-using PetRadar.API.Hubs;
+using Notifications.Infrastructure.Realtime;
 
 namespace PetRadar.API.Infrastructure;
 
