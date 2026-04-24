@@ -37,6 +37,12 @@ export interface AnimalCardDto {
   createdAt: string
 }
 
+export interface UserMeDto {
+  id: string
+  name: string
+  email: string
+}
+
 export interface LoginResponseDto {
   token: string
   userId: string
