@@ -1,8 +1,33 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useSignalR } from '@/composables/useSignalR'
+import { useNotificationsStore } from '@/modules/notifications/stores/notifications.store'
+import NotificationBell from '@/modules/notifications/components/NotificationBell.vue'
+import type { AnimalFoundEventDto } from '@/types/api.types'
 
 const authStore = useAuthStore()
+const signalR = useSignalR()
+const notificationsStore = useNotificationsStore()
+
+watch(
+  () => authStore.isAuthenticated,
+  async (isAuthenticated) => {
+    if (isAuthenticated) {
+      await signalR.connect()
+      signalR.on<AnimalFoundEventDto>('animal-found', (payload) => {
+        notificationsStore.addFromSignalREvent(payload)
+      })
+      void notificationsStore.fetchAll()
+    } else {
+      signalR.off('animal-found')
+      await signalR.disconnect()
+      notificationsStore.reset()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -55,6 +80,8 @@ const authStore = useAuthStore()
         </svg>
         <span class="nav-label">Publicar</span>
       </RouterLink>
+
+      <NotificationBell />
       </div>
     </nav>
   </div>

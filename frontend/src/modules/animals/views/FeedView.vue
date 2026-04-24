@@ -1,23 +1,49 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnimalsStore } from '../stores/animals.store'
 import { useGeolocation } from '@/composables/useGeolocation'
+import { useSignalR } from '@/composables/useSignalR'
 import AnimalCard from '../components/AnimalCard.vue'
 import AppSpinner from '@/components/AppSpinner.vue'
 import AppEmptyState from '@/components/AppEmptyState.vue'
 import AppButton from '@/components/AppButton.vue'
+import type { AnimalPostedEventDto } from '@/types/api.types'
 
 const FEED_RADIUS_KM = 10
 
 const router = useRouter()
 const animalsStore = useAnimalsStore()
 const geo = useGeolocation()
+const signalR = useSignalR()
+
+let _currentRegionKey: string | null = null
+
+function buildRegionKey(lat: number, lng: number): string {
+  const latRounded = (Math.round(lat * 10) / 10).toFixed(1)
+  const lngRounded = (Math.round(lng * 10) / 10).toFixed(1)
+  return `region:${latRounded}:${lngRounded}`
+}
 
 onMounted(async () => {
   await geo.requestLocation()
   if (geo.latitude.value !== null && geo.longitude.value !== null) {
     await animalsStore.fetchNearby(geo.latitude.value, geo.longitude.value, FEED_RADIUS_KM)
+
+    if (signalR.isConnected.value) {
+      _currentRegionKey = buildRegionKey(geo.latitude.value, geo.longitude.value)
+      await signalR.joinRegion(_currentRegionKey)
+      signalR.on<AnimalPostedEventDto>('animal-posted', (payload) => {
+        void animalsStore.handleAnimalPostedEvent(payload)
+      })
+    }
+  }
+})
+
+onUnmounted(() => {
+  signalR.off('animal-posted')
+  if (_currentRegionKey !== null) {
+    void signalR.leaveRegion(_currentRegionKey)
   }
 })
 

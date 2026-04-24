@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { animalsService } from '../services/animals.service'
-import type { AnimalCardDto } from '@/types/api.types'
+import type { AnimalCardDto, AnimalPostedEventDto } from '@/types/api.types'
 
 export const useAnimalsStore = defineStore('animals', () => {
   const items = ref<AnimalCardDto[]>([])
@@ -75,6 +75,15 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
+  async function handleAnimalPostedEvent(payload: AnimalPostedEventDto): Promise<void> {
+    try {
+      const result = await animalsService.getById(payload.animalPostId)
+      addFromSignalR(result.data)
+    } catch {
+      // falha silenciosa
+    }
+  }
+
   return {
     items,
     nextPageToken,
@@ -89,5 +98,6 @@ export const useAnimalsStore = defineStore('animals', () => {
     uploadMedia,
     createAnimal,
     addFromSignalR,
+    handleAnimalPostedEvent,
   }
 })
