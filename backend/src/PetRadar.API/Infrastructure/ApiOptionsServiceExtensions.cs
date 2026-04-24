@@ -43,6 +43,7 @@ internal static class ApiOptionsServiceExtensions
 
         services.AddScoped<IMediaUploadRequestValidator, MediaUploadRequestValidator>();
         services.AddScoped<IDeleteAnimalPostValidator, DeleteAnimalPostValidator>();
+        services.AddScoped<ISendTipValidator, SendTipValidator>();
 
         return services;
     }
