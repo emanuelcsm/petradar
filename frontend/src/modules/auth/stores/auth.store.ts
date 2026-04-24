@@ -29,6 +29,15 @@ function parseUserFromToken(token: string): UserMeDto | null {
   return { id, name: name ?? '', email }
 }
 
+function mapAuthError(err: unknown, action: 'login' | 'register'): string {
+  const status = (err as { response?: { status?: number } })?.response?.status
+  if (action === 'login' && status === 401) return 'E-mail ou senha incorretos.'
+  if (action === 'register' && status === 409) return 'Este e-mail já está cadastrado.'
+  if (status === 400 || status === 422) return 'Dados inválidos. Verifique os campos.'
+  if (!status) return 'Não foi possível conectar. Verifique sua conexão.'
+  return 'Erro inesperado. Tente novamente.'
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const storedToken = localStorage.getItem(TOKEN_KEY)
   const initialToken = storedToken && !isTokenExpired(storedToken) ? storedToken : null
@@ -39,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const token = ref<string | null>(initialToken)
   const user = ref<UserMeDto | null>(initialToken ? parseUserFromToken(initialToken) : null)
+  const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => token.value !== null)
 
@@ -49,13 +59,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(email: string, password: string): Promise<void> {
-    const response = await authService.login(email, password)
-    persistAuth(response.data)
+    error.value = null
+    try {
+      const response = await authService.login(email, password)
+      persistAuth(response.data)
+    } catch (e: unknown) {
+      error.value = mapAuthError(e, 'login')
+    }
   }
 
   async function register(name: string, email: string, password: string): Promise<void> {
-    const response = await authService.register(name, email, password)
-    persistAuth(response.data)
+    error.value = null
+    try {
+      const response = await authService.register(name, email, password)
+      persistAuth(response.data)
+    } catch (e: unknown) {
+      error.value = mapAuthError(e, 'register')
+    }
   }
 
   function logout(): void {
@@ -64,5 +84,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(TOKEN_KEY)
   }
 
-  return { token, user, isAuthenticated, login, register, logout }
+  return { token, user, error, isAuthenticated, login, register, logout }
 })
