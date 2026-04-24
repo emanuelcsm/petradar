@@ -18,6 +18,8 @@ public sealed class AnimalFoundIntegrationEventPublisher : INotificationHandler<
         var integrationEvent = new AnimalFoundIntegrationEvent(
             notification.AnimalPostId,
             notification.UserId,
+            notification.Latitude,
+            notification.Longitude,
             notification.FoundAt);
 
         await _mediator.Publish(integrationEvent, cancellationToken);

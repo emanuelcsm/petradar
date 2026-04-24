@@ -114,7 +114,7 @@ public sealed class AnimalPost : AggregateRoot
 
         Status = AnimalStatus.Found();
 
-        AddDomainEvent(new AnimalFoundEvent(Id, UserId, DateTime.UtcNow));
+        AddDomainEvent(new AnimalFoundEvent(Id, UserId, Location.Latitude, Location.Longitude, DateTime.UtcNow));
     }
 
     public void Delete()
