@@ -7,40 +7,35 @@ namespace Notifications.Application.Integration.Consumers;
 public sealed class AnimalFoundIntegrationEventHandler : INotificationHandler<AnimalFoundIntegrationEvent>
 {
     private readonly INotificationService _notificationService;
-    private readonly INotificationRepository _notificationRepository;
 
-    public AnimalFoundIntegrationEventHandler(
-        INotificationService notificationService,
-        INotificationRepository notificationRepository)
+    public AnimalFoundIntegrationEventHandler(INotificationService notificationService)
     {
         _notificationService = notificationService;
-        _notificationRepository = notificationRepository;
     }
 
     public async Task Handle(AnimalFoundIntegrationEvent notification, CancellationToken cancellationToken)
     {
-        const string eventName = "animal-found";
+        var regionKey = BuildRegionKey(notification.Latitude, notification.Longitude);
 
         var payload = new
         {
             notification.AnimalPostId,
-            notification.UserId,
+            Status = "Found",
             notification.FoundAt
         };
 
-        await _notificationService.SendToUserAsync(
-            notification.UserId,
-            eventName,
+        await _notificationService.BroadcastToRegionAsync(
+            regionKey,
+            "animal-found",
             payload,
             cancellationToken);
+    }
 
-        var notificationRecord = new NotificationWriteModel(
-            EventName: eventName,
-            Message: "Seu animal foi marcado como encontrado.",
-            CreatedAt: notification.FoundAt,
-            UserId: notification.UserId,
-            Payload: payload);
+    private static string BuildRegionKey(double latitude, double longitude)
+    {
+        var latBucket = Math.Round(latitude, 1, MidpointRounding.AwayFromZero);
+        var lngBucket = Math.Round(longitude, 1, MidpointRounding.AwayFromZero);
 
-        await _notificationRepository.SaveAsync(notificationRecord, cancellationToken);
+        return $"region:{latBucket:F1}:{lngBucket:F1}";
     }
 }
