@@ -30,6 +30,11 @@ export const animalsService = {
     })
   },
 
+  async getById(id: string): Promise<ApiResponse<AnimalCardDto>> {
+    const { data } = await api.get<ApiResponse<AnimalCardDto>>(`/api/animals/${id}`)
+    return data
+  },
+
   async markFound(_id: string): Promise<void> {
     await api.patch(`/api/animals/${_id}/found`)
   },

@@ -60,3 +60,17 @@ export interface NotificationDto {
 export interface UploadMediaResponseDto {
   mediaId: string
 }
+
+export interface AnimalPostedEventDto {
+  animalPostId: string
+  userId: string
+  latitude: number
+  longitude: number
+  createdAt: string
+}
+
+export interface AnimalFoundEventDto {
+  animalPostId: string
+  userId: string
+  foundAt: string
+}
