@@ -37,9 +37,7 @@ export const animalsService = {
   async uploadMedia(_file: File): Promise<ApiResponse<UploadMediaResponseDto>> {
     const form = new FormData()
     form.append('file', _file)
-    const { data } = await api.post<ApiResponse<UploadMediaResponseDto>>('/api/media', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    const { data } = await api.post<ApiResponse<UploadMediaResponseDto>>('/api/media', form)
     return data
   },
 }

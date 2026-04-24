@@ -9,6 +9,8 @@ export const useAnimalsStore = defineStore('animals', () => {
   const hasNextPage = ref(false)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isCreating = ref(false)
+  const createError = ref<string | null>(null)
 
   const hasItems = computed(() => items.value.length > 0)
   const hasError = computed(() => error.value !== null)
@@ -40,6 +42,32 @@ export const useAnimalsStore = defineStore('animals', () => {
     }
   }
 
+  async function uploadMedia(file: File): Promise<string | null> {
+    try {
+      const result = await animalsService.uploadMedia(file)
+      return result.data.mediaId
+    } catch {
+      return null
+    }
+  }
+
+  async function createAnimal(
+    description: string,
+    latitude: number,
+    longitude: number,
+    mediaIds: string[],
+  ): Promise<void> {
+    isCreating.value = true
+    createError.value = null
+    try {
+      await animalsService.create(description, latitude, longitude, mediaIds)
+    } catch {
+      createError.value = 'Não foi possível publicar o animal. Tente novamente.'
+    } finally {
+      isCreating.value = false
+    }
+  }
+
   function addFromSignalR(animal: AnimalCardDto): void {
     const exists = items.value.some((a) => a.id === animal.id)
     if (!exists) {
@@ -53,9 +81,13 @@ export const useAnimalsStore = defineStore('animals', () => {
     hasNextPage,
     isLoading,
     error,
+    isCreating,
+    createError,
     hasItems,
     hasError,
     fetchNearby,
+    uploadMedia,
+    createAnimal,
     addFromSignalR,
   }
 })

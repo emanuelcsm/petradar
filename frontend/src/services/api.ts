@@ -10,6 +10,11 @@ api.interceptors.request.use(config => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // For FormData payloads the browser must set Content-Type with the multipart
+  // boundary. Deleting the default here lets XMLHttpRequest do it automatically.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 
