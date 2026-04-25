@@ -11,6 +11,9 @@ internal static class RedisServiceExtensions
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"]!));
 
+        services.AddStackExchangeRedisCache(options =>
+            options.Configuration = configuration["Redis:ConnectionString"]);
+
         return services;
     }
 }

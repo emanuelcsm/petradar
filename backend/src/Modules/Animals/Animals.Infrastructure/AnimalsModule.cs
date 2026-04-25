@@ -1,6 +1,8 @@
+using Animals.Application.Cache;
 using Animals.Application.Commands.CreateAnimalPost;
 using Animals.Application.Integration.Interfaces;
 using Animals.Application.Interfaces;
+using Animals.Infrastructure.Cache;
 using Animals.Infrastructure.Persistence;
 using Animals.Infrastructure.Persistence.Documents;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +51,7 @@ public static class AnimalsModule
 
         services.AddScoped<IAnimalRepository, MongoAnimalRepository>();
         services.AddScoped<IKnownMediaRepository, MongoKnownMediaRepository>();
+        services.AddScoped<IAnimalListingCache, RedisAnimalListingCache>();
 
         return services;
     }

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Animals.Application.Cache;
 using Animals.Application.Integration.Interfaces;
 using Animals.Application.Interfaces;
 using Animals.Domain.Exceptions;
@@ -10,15 +12,20 @@ namespace Animals.Application.Queries.GetAnimalsByLocation;
 public sealed class GetAnimalsByLocationQueryHandler
     : IRequestHandler<GetAnimalsByLocationQuery, CursorPage<GetAnimalsByLocationResult>>
 {
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+
     private readonly IAnimalRepository _animalRepository;
     private readonly IKnownMediaRepository _knownMediaRepository;
+    private readonly IAnimalListingCache _cache;
 
     public GetAnimalsByLocationQueryHandler(
         IAnimalRepository animalRepository,
-        IKnownMediaRepository knownMediaRepository)
+        IKnownMediaRepository knownMediaRepository,
+        IAnimalListingCache cache)
     {
         _animalRepository = animalRepository;
         _knownMediaRepository = knownMediaRepository;
+        _cache = cache;
     }
 
     public async Task<CursorPage<GetAnimalsByLocationResult>> Handle(
@@ -40,6 +47,19 @@ public sealed class GetAnimalsByLocationQueryHandler
         catch (ArgumentOutOfRangeException)
         {
             throw new InvalidNearbySearchLocationException(request.Latitude, request.Longitude);
+        }
+
+        var (regionLat, regionLng) = NearbyAnimalsCacheKey.GetRegion(request.Latitude, request.Longitude);
+        var versionKey = NearbyAnimalsCacheKey.ForRegionVersion(regionLat, regionLng);
+        var version = await _cache.GetRegionVersionAsync(versionKey, cancellationToken);
+        var cacheKey = NearbyAnimalsCacheKey.ForQuery(regionLat, regionLng, version, request.RadiusKm, request.PageSize, request.NextPageToken);
+
+        var cached = await _cache.GetAsync(cacheKey, cancellationToken);
+        if (cached is not null)
+        {
+            var cachedPage = JsonSerializer.Deserialize<CursorPage<GetAnimalsByLocationResult>>(cached);
+            if (cachedPage is not null)
+                return cachedPage;
         }
 
         var cursor = NearbyAnimalsPageTokenCodec.Decode(request.NextPageToken);
@@ -89,9 +109,13 @@ public sealed class GetAnimalsByLocationQueryHandler
                 CreatedAt: animal.CreatedAt))
             .ToList();
 
-        return new CursorPage<GetAnimalsByLocationResult>(
+        var page = new CursorPage<GetAnimalsByLocationResult>(
             Data: data,
             NextPageToken: nextPageToken,
             HasNextPage: hasNextPage);
+
+        await _cache.SetAsync(cacheKey, JsonSerializer.Serialize(page), CacheTtl, cancellationToken);
+
+        return page;
     }
 }
