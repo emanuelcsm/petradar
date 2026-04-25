@@ -33,6 +33,7 @@ app.UseLocalMediaStaticFiles();
 app.UseFrontendCors();
 
 app.UseAuthentication();
+app.UseJwtRevocation();
 app.UseAuthorization();
 
 app.MapControllers();
