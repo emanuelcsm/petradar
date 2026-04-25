@@ -26,6 +26,8 @@ function buildRegionKey(lat: number, lng: number): string {
 }
 
 onMounted(async () => {
+  if (geo.isPermanentlyDenied.value) return
+
   await geo.requestLocation()
   if (geo.latitude.value !== null && geo.longitude.value !== null) {
     await animalsStore.fetchNearby(geo.latitude.value, geo.longitude.value, FEED_RADIUS_KM)
@@ -108,6 +110,31 @@ async function loadMore(): Promise<void> {
     <div v-if="geo.isLoading.value" class="state-center">
       <AppSpinner />
       <p class="state-message">Obtendo sua localização…</p>
+    </div>
+
+    <div v-else-if="geo.isPermanentlyDenied.value" class="state-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="state-icon state-icon--neutral"
+        aria-hidden="true"
+      >
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <line x1="12" y1="7" x2="12" y2="13" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <p class="state-title">Localização necessária</p>
+      <p class="state-message">
+        O feed exibe animais próximos a você e requer acesso à sua localização.
+        Habilite a permissão nas configurações do navegador e recarregue a página.
+      </p>
     </div>
 
     <div v-else-if="geo.error.value" class="state-center">
@@ -268,6 +295,11 @@ async function loadMore(): Promise<void> {
   opacity: 0.5;
 }
 
+.state-icon--neutral {
+  color: var(--color-neutral-400);
+  opacity: 1;
+}
+
 .state-icon--warning {
   color: var(--color-warning);
   opacity: 1;
@@ -278,11 +310,19 @@ async function loadMore(): Promise<void> {
   opacity: 1;
 }
 
+.state-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
 .state-message {
   font-size: var(--font-size-sm);
   color: var(--color-neutral-600);
   text-align: center;
   margin: 0;
+  max-width: 320px;
 }
 
 .state-message--error {

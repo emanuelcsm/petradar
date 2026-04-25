@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnimalsStore } from '../stores/animals.store'
 import { useGeolocation } from '@/composables/useGeolocation'
 import AnimalMap from '../components/AnimalMap.vue'
+import AnimalMapPicker from '../components/AnimalMapPicker.vue'
 import AppButton from '@/components/AppButton.vue'
-import AppInput from '@/components/AppInput.vue'
 import AppSpinner from '@/components/AppSpinner.vue'
 
 interface FileUploadState {
@@ -30,8 +30,6 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const locationMode = ref<LocationMode>('gps')
 const latitude = ref<number | null>(null)
 const longitude = ref<number | null>(null)
-const latitudeStr = ref('')
-const longitudeStr = ref('')
 const formErrors = ref<Record<string, string>>({})
 const submitPhase = ref<SubmitPhase>('idle')
 const submitError = ref<string | null>(null)
@@ -108,8 +106,11 @@ function switchToGps(): void {
 
 function switchToManual(): void {
   locationMode.value = 'manual'
-  if (latitude.value !== null) latitudeStr.value = latitude.value.toFixed(6)
-  if (longitude.value !== null) longitudeStr.value = longitude.value.toFixed(6)
+}
+
+function onLocationPicked(coords: { latitude: number; longitude: number }): void {
+  latitude.value = coords.latitude
+  longitude.value = coords.longitude
 }
 
 function validate(): boolean {
@@ -118,7 +119,7 @@ function validate(): boolean {
     formErrors.value.description = 'Descrição obrigatória.'
   }
   if (!hasLocation.value) {
-    formErrors.value.location = 'Localização obrigatória. Use GPS ou insira as coordenadas.'
+    formErrors.value.location = 'Localização obrigatória. Use GPS ou marque no mapa.'
   }
   return Object.keys(formErrors.value).length === 0
 }
@@ -169,16 +170,6 @@ async function submit(): Promise<void> {
 
 onUnmounted(() => {
   files.value.forEach((f) => URL.revokeObjectURL(f.previewUrl))
-})
-
-watch(latitudeStr, (val) => {
-  const parsed = parseFloat(val)
-  latitude.value = isNaN(parsed) ? null : parsed
-})
-
-watch(longitudeStr, (val) => {
-  const parsed = parseFloat(val)
-  longitude.value = isNaN(parsed) ? null : parsed
 })
 </script>
 
@@ -387,13 +378,48 @@ watch(longitudeStr, (val) => {
           <AppButton
             type="button"
             variant="secondary"
-            :disabled="geo.isLoading.value || isSubmitting"
+            :disabled="geo.isLoading.value || isSubmitting || geo.isPermanentlyDenied.value"
             @click="requestGps"
           >
             <AppSpinner v-if="geo.isLoading.value" />
             <span>{{ geo.isLoading.value ? 'Obtendo localização…' : 'Usar minha localização' }}</span>
           </AppButton>
-          <p v-if="geo.error.value" class="field-error" role="alert">{{ geo.error.value }}</p>
+
+          <p v-if="geo.isPermanentlyDenied.value" class="location-blocked-note" role="alert">
+            Localização bloqueada nas configurações do navegador. Use o modo
+            <button type="button" class="inline-link" @click="switchToManual">Manual</button>
+            para marcar a posição no mapa.
+          </p>
+          <p v-else-if="geo.error.value" class="field-error" role="alert">
+            {{ geo.error.value }}
+          </p>
+
+          <p v-if="hasLocation && !geo.isPermanentlyDenied.value" class="coords-display">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            {{ latitude?.toFixed(4) }}, {{ longitude?.toFixed(4) }}
+          </p>
+
+          <div v-if="hasLocation" class="map-preview">
+            <AnimalMap :latitude="latitude ?? 0" :longitude="longitude ?? 0" />
+          </div>
+        </div>
+
+        <div v-else class="manual-section">
+          <AnimalMapPicker :latitude="latitude" :longitude="longitude" @pick="onLocationPicked" />
           <p v-if="hasLocation" class="coords-display">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -412,29 +438,6 @@ watch(longitudeStr, (val) => {
             </svg>
             {{ latitude?.toFixed(4) }}, {{ longitude?.toFixed(4) }}
           </p>
-        </div>
-
-        <div v-else class="manual-section">
-          <AppInput
-            id="lat-input"
-            v-model="latitudeStr"
-            label="Latitude"
-            type="number"
-            placeholder="-23.5505"
-            :disabled="isSubmitting"
-          />
-          <AppInput
-            id="lng-input"
-            v-model="longitudeStr"
-            label="Longitude"
-            type="number"
-            placeholder="-46.6333"
-            :disabled="isSubmitting"
-          />
-        </div>
-
-        <div v-if="hasLocation" class="map-preview">
-          <AnimalMap :latitude="latitude ?? 0" :longitude="longitude ?? 0" />
         </div>
 
         <span v-if="formErrors.location" class="field-error" role="alert">
@@ -708,6 +711,23 @@ watch(longitudeStr, (val) => {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.location-blocked-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+.inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--color-primary-600);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .coords-display {

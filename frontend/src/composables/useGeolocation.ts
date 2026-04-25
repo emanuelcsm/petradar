@@ -5,12 +5,31 @@ export function useGeolocation() {
   const longitude = ref<number | null>(null)
   const error = ref<string | null>(null)
   const isLoading = ref(false)
+  const permissionState = ref<PermissionState | 'unknown'>('unknown')
 
   const isSupported = computed(() => 'geolocation' in navigator)
+  const isPermanentlyDenied = computed(() => permissionState.value === 'denied')
+
+  if (isSupported.value && navigator.permissions) {
+    navigator.permissions
+      .query({ name: 'geolocation' })
+      .then((status) => {
+        permissionState.value = status.state
+      })
+      .catch(() => {
+        // Permissions API unavailable — permission state discovered on first request
+      })
+  }
 
   async function requestLocation(): Promise<void> {
     if (!isSupported.value) {
       error.value = 'Geolocalização não suportada neste navegador.'
+      return
+    }
+
+    if (permissionState.value === 'denied') {
+      error.value =
+        'Permissão de localização bloqueada. Habilite nas configurações do navegador e recarregue a página.'
       return
     }
 
@@ -22,14 +41,18 @@ export function useGeolocation() {
         (position) => {
           latitude.value = position.coords.latitude
           longitude.value = position.coords.longitude
+          permissionState.value = 'granted'
           isLoading.value = false
           resolve()
         },
         (err) => {
-          error.value =
-            err.code === GeolocationPositionError.PERMISSION_DENIED
-              ? 'Permissão de localização negada.'
-              : 'Não foi possível obter sua localização.'
+          if (err.code === GeolocationPositionError.PERMISSION_DENIED) {
+            permissionState.value = 'denied'
+            error.value =
+              'Permissão de localização bloqueada. Habilite nas configurações do navegador e recarregue a página.'
+          } else {
+            error.value = 'Não foi possível obter sua localização.'
+          }
           isLoading.value = false
           resolve()
         },
@@ -38,5 +61,14 @@ export function useGeolocation() {
     })
   }
 
-  return { latitude, longitude, error, isLoading, isSupported, requestLocation }
+  return {
+    latitude,
+    longitude,
+    error,
+    isLoading,
+    isSupported,
+    permissionState,
+    isPermanentlyDenied,
+    requestLocation,
+  }
 }
