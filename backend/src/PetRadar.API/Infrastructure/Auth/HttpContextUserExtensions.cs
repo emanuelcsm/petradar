@@ -24,4 +24,7 @@ internal static class HttpContextUserExtensions
 
         return name;
     }
+
+    internal static string? GetJti(this ClaimsPrincipal user)
+        => user.FindFirstValue(JwtRegisteredClaimNames.Jti);
 }
