@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnimalsStore } from '../stores/animals.store'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useGeolocation } from '@/composables/useGeolocation'
 import { useSignalR } from '@/composables/useSignalR'
 import AnimalCard from '../components/AnimalCard.vue'
@@ -14,6 +15,7 @@ const FEED_RADIUS_KM = 10
 
 const router = useRouter()
 const animalsStore = useAnimalsStore()
+const authStore = useAuthStore()
 const geo = useGeolocation()
 const signalR = useSignalR()
 
@@ -74,6 +76,11 @@ function goToPost(): void {
   router.push({ name: 'post-animal' })
 }
 
+function handleLogout(): void {
+  authStore.logout()
+  router.push({ name: 'login' })
+}
+
 async function loadMore(): Promise<void> {
   if (!animalsStore.hasNextPage || animalsStore.isLoading) return
   if (geo.latitude.value !== null && geo.longitude.value !== null) {
@@ -90,19 +97,46 @@ async function loadMore(): Promise<void> {
 <template>
   <div class="feed-view">
     <header class="feed-header">
-      <div class="feed-brand">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="brand-icon"
-          aria-hidden="true"
-        >
-          <path d="M4.5 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm15 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM7 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm10 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM12 22c3.5 0 7-2.5 7-7 0-2.5-1.5-4.5-3.5-5.5-.5-.3-1-.5-1.5-.7-.5-.2-1-.3-2-.3s-1.5.1-2 .3c-.5.2-1 .4-1.5.7C6.5 10.5 5 12.5 5 15c0 4.5 3.5 7 7 7z"/>
-        </svg>
-        <span class="brand-name">Pet Radar</span>
+      <div class="feed-header-top">
+        <div class="feed-brand">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="brand-icon"
+            aria-hidden="true"
+          >
+            <path d="M4.5 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm15 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM7 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm10 0a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM12 22c3.5 0 7-2.5 7-7 0-2.5-1.5-4.5-3.5-5.5-.5-.3-1-.5-1.5-.7-.5-.2-1-.3-2-.3s-1.5.1-2 .3c-.5.2-1 .4-1.5.7C6.5 10.5 5 12.5 5 15c0 4.5 3.5 7 7 7z"/>
+          </svg>
+          <span class="brand-name">Pet Radar</span>
+        </div>
+
+        <div class="feed-user">
+          <span class="feed-greeting">
+            Olá, <strong class="feed-greeting-name">{{ authStore.user?.name }}</strong>
+          </span>
+          <AppButton variant="ghost" @click="handleLogout">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sair
+          </AppButton>
+        </div>
       </div>
       <p class="feed-subtitle">Animais perdidos na sua região</p>
     </header>
@@ -240,16 +274,26 @@ async function loadMore(): Promise<void> {
 }
 
 .feed-header {
-  padding: var(--space-6) 0 var(--space-5);
+  padding: var(--space-5) 0 var(--space-5);
   border-bottom: 1px solid var(--color-neutral-200);
   margin-bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.feed-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .feed-brand {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-1);
+  flex-shrink: 0;
 }
 
 .brand-icon {
@@ -268,6 +312,24 @@ async function loadMore(): Promise<void> {
   font-size: var(--font-size-sm);
   color: var(--color-neutral-600);
   margin: 0;
+}
+
+.feed-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.feed-greeting {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+}
+
+.feed-greeting-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
 }
 
 .feed-list {
