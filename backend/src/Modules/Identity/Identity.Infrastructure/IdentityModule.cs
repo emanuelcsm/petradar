@@ -43,6 +43,7 @@ public static class IdentityModule
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<ITokenBlacklist, RedisTokenBlacklist>();
 
         return services;
     }
