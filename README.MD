@@ -372,6 +372,102 @@ pub/sub para o SignalR. Em um cenário com múltiplas instâncias do backend, me
 publicadas em qualquer instância são entregues a clientes conectados em qualquer outra
 instância — o Redis garante a fan-out cross-server.
 
+**Como testar o backplane com Docker**
+
+O `docker-compose.yml` padrão sobe uma única instância do backend, portanto o
+backplane não é exercitado. Para testá-lo é necessário subir duas instâncias e
+colocar um load balancer na frente delas.
+
+*Alteração no `frontend/nginx.conf`:*
+
+O nginx do frontend atualmente aponta fixo para `backend:8080`. Com múltiplas
+instâncias precisamos de dois blocos `upstream` distintos — round-robin para a API
+REST e `ip_hash` para o WebSocket (o negotiate e o upgrade do WebSocket precisam
+cair na mesma instância).
+
+O Docker Compose nomeia os containers como `{project}-{service}-{index}`. Com o
+arquivo em `PetRadar/`, o project name padrão é `petradar`, resultando em
+`petradar-backend-1` e `petradar-backend-2`. Substitua o conteúdo de
+`frontend/nginx.conf` por:
+
+```nginx
+upstream api_backend {
+    server petradar-backend-1:8080;
+    server petradar-backend-2:8080;
+}
+
+upstream ws_backend {
+    ip_hash;
+    server petradar-backend-1:8080;
+    server petradar-backend-2:8080;
+}
+
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://api_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 25m;
+    }
+
+    location /media/ {
+        proxy_pass http://api_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /hubs/ {
+        proxy_pass http://ws_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+> Se o seu project name for diferente de `petradar`, confirme os nomes reais com
+> `docker compose ps` após o primeiro `up` e ajuste os `server` do upstream.
+
+*Subindo com escala:*
+
+```bash
+docker compose up --build --scale backend=2
+```
+
+*Verificando que o backplane funciona:*
+
+1. Abra duas abas no browser em `http://localhost:5173`, autentique-se em ambas e
+   abra o feed (as duas abas precisam estar na mesma região geográfica).
+2. Acompanhe os logs das instâncias em terminais separados:
+   ```bash
+   docker logs -f petradar-backend-1
+   docker logs -f petradar-backend-2
+   ```
+3. Numa das abas publique um animal. Observe nos logs qual instância recebeu o
+   `POST /api/animals` (round-robin da API).
+4. A outra aba deve receber o evento `animal-posted` via WebSocket mesmo que esteja
+   conectada à instância que **não** processou o POST. Se o evento chegar, o
+   backplane está funcionando. Se não chegar, o Redis não está atuando como
+   intermediário.
+
 ---
 
 ### Como o SignalR é usado
