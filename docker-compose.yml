@@ -18,14 +18,14 @@ services:
     ports:
       - "5000:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - MongoDB__ConnectionString=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/petradar?authSource=admin
-      - MongoDB__DatabaseName=petradar
-      - Redis__ConnectionString=redis:6379
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - MongoDB__ConnectionString=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
+      - MongoDB__DatabaseName=${MONGO_DB_NAME}
+      - Redis__ConnectionString=${REDIS_CONNECTION_STRING}
       - Jwt__Secret=${JWT_SECRET}
       - Jwt__Issuer=PetRadar
       - Jwt__Audience=PetRadar
-      - Jwt__ExpiresInMinutes=60
+      - Jwt__ExpiresInMinutes=${JWT_EXPIRES_IN_MINUTES}
       - LocalStorage__BasePath=${MEDIA_BASE_PATH}
       - Cors__Frontend__AllowedOrigins__0=${FRONTEND_ORIGIN}
     volumes:
