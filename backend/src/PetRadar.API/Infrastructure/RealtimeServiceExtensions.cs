@@ -5,10 +5,13 @@ namespace PetRadar.API.Infrastructure;
 
 internal static class RealtimeServiceExtensions
 {
-    internal static IServiceCollection AddRealtime(this IServiceCollection services)
+    internal static IServiceCollection AddRealtime(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddSingleton<IUserIdProvider, SubClaimUserIdProvider>();
-        services.AddSignalR();
+        services.AddSignalR()
+            .AddStackExchangeRedis(configuration["Redis:ConnectionString"]!);
 
         return services;
     }

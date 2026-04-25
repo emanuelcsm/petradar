@@ -9,7 +9,7 @@ builder.Services.AddMongoDb(builder.Configuration);
 builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddDomainEvents();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddRealtime();
+builder.Services.AddRealtime(builder.Configuration);
 builder.Services.AddFrontendCors(builder.Configuration);
 
 // Modules
