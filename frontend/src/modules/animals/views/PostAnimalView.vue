@@ -117,6 +117,8 @@ function validate(): boolean {
   formErrors.value = {}
   if (!description.value.trim()) {
     formErrors.value.description = 'Descrição obrigatória.'
+  } else if (description.value.trim().length < 10) {
+    formErrors.value.description = 'A descrição deve ter pelo menos 10 caracteres.'
   }
   if (!hasLocation.value) {
     formErrors.value.location = 'Localização obrigatória. Use GPS ou marque no mapa.'
